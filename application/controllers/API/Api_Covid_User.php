@@ -24,12 +24,21 @@ class Api_Covid_User extends REST_Controller{
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
 
        }
+
+
+       public function User_self_assessment_detail_post(){
+
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->Set_self_assessment_detail($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+              // echo $result;
+   
+       }
   
 
        public function GetSumStatus_get(){
               $result = $this->Model_Covid_User->Get_Sum_Status();  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
-
        }
        // FOR USER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -75,10 +84,19 @@ class Api_Covid_User extends REST_Controller{
        public function Nurse_All_User_by_dept_code_post(){
 
               $data = json_decode(file_get_contents('php://input'), true);
-              $result = $this->Model_Covid_Nurse->Nures_Get_All_User_by_dept_code($data);  
+              $result = $this->Model_Covid_Nurse->Nurse_Get_All_User_by_dept_code($data);  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
 
        }
+
+       public function Nurse_Comment_user_with_self_assessment_id_post(){
+
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_Nurse->Nurse_Comment_user_with_self_assessment_id($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+
+       }
+
        // FOR Nurse +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      
 
@@ -95,6 +113,17 @@ class Api_Covid_User extends REST_Controller{
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
    
        }
+
+       public function Doctor_Get_self_assessment_by_user_ad_post(){
+
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_Doctor->Doctor_Get_self_assessment_by_user_ad($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+   
+       }
+
+
+       
        // FOR Doctor +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 

@@ -310,6 +310,68 @@ class Model_Covid_User extends CI_Model
   
     }
 
+
+    public function Set_self_assessment_detail($result){
+
+
+    //   $cv_self_assessment_detail = $this->db
+    //             ->query("SELECT * FROM `cv_self_assessment_detail`")
+    //             ->result_array();
+    //             return $cv_self_assessment_detail[1]['cv_self_assessment_detail_result'];
+
+        $data = array();
+
+        $data['1_Have_Fever'] = array('status' => "1");
+        $data['2_Have_symptoms'] = array('status' => "1");
+        $data['3_Physician'] = array('status' => "1");
+        $data['4_Close_up_people_risk'] = array('status' => "1");
+        $data['5_Close_up_people_colds'] = array('status' => "1");
+        $data['6_Close_up_people_covid'] = array('status' => "1");
+
+        $data['7_Transport'] =  array(
+            'status_one' => "1",
+            'status_two' => "1",
+            'status_detail' => array('status'=>"1",'detail'=>"textdetaillll"),
+        );
+        $data['8_Protect'] = array(
+            'status_one' => "1",
+            'status_two' => "1",
+            'status_detail' => array('status'=>"1",'detail'=>"textdetaillll"),
+        );
+
+        $data['9_Protect'] = array(
+            'status_one' => "1",
+            'status_two' => "1",
+            'status_three' => "1",
+            'status_four' => "1",
+            'status_five' => "1",
+            'status_detail' => array('status'=>"1",'detail'=>"textdetaillll"),
+        );
+
+        $data['10_Activity_risk'] = array(
+            'status_one' => "1",
+            'status_two' => "1",
+            'status_three' => "1",
+            'status_four' => "1",
+            'status_detail' => array('status'=>"1",'detail'=>"textdetaillll"),
+        );
+
+        $data['11_Time_line'] = array(
+            'status_one' => "1",
+            'status_two' => "1",
+            'status_three' => "1",
+           
+        );
+
+        return $data;
+
+
+    }
+
+
+
+
+
     public function Update_User_latest_status($result){
 
       

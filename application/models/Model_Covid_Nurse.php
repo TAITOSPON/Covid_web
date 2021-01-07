@@ -47,7 +47,6 @@ class Model_Covid_Nurse extends CI_Model
 
 
     public function Get_All_Dept_Name(){
-        // $user = $this->db->query("SELECT DISTINCT user_ad_dept_code FROM cv_user")->result_array();
 
         $user = $this->db->query("SELECT DISTINCT user_ad_dept_code FROM `cv_user_latest_status` INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code")->result_array();
 
@@ -93,7 +92,7 @@ class Model_Covid_Nurse extends CI_Model
     }
 
 
-    public function Nures_Get_All_User_by_dept_code($result){
+    public function Nurse_Get_All_User_by_dept_code($result){
 
         if(isset($result['dept_code'])){
             $dept_code = $result['dept_code'];
@@ -120,15 +119,39 @@ class Model_Covid_Nurse extends CI_Model
                     
                         $user_ad_code = $user_result[$index_user_result]['user_ad_code'];
     
-                        $user_result[$index_user_result]['user_self_assessment_result'] = $this->db  
+                
+                        $user_self_assessment_result = $this->db
                         ->query("SELECT * FROM `cv_self_assessment`
                             WHERE `user_ad_code` =  '$user_ad_code'
                             ORDER BY `self_assessment_id` DESC LIMIT 100")
                         ->result_array();
-    
+
+                        $user_result[$index_user_result]['user_self_assessment_result'] = $user_self_assessment_result;
+
+
+                        for($index_user_self_assessment_result=0; $index_user_self_assessment_result < sizeof($user_self_assessment_result); $index_user_self_assessment_result++){
+
+                            $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
+                        
+                            if($nurse_comment_id != "0"){
+
+                                $nurse_comment_result = $this->db
+                                ->query("SELECT * FROM `cv_nurse_comment` WHERE `nurse_comment_id` =  '$nurse_comment_id'")
+                                ->result_array();
+
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = $nurse_comment_result;
+
+                            }else{
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = array();
+
+                            }
+
+                        }
+                      
+
                     }
     
-                    $result_dept[$i]["RESULT_ALL_USER"] =  $user_result ;
+                    $result_dept[$i]["RESULT_ALL_USER"] = $user_result ;
     
                 }
     
@@ -152,12 +175,34 @@ class Model_Covid_Nurse extends CI_Model
                     
                     $user_ad_code = $user_result[$index_user_result]['user_ad_code'];
 
-                    $user_result[$index_user_result]['user_self_assessment_result'] = $this->db  
+                   
+                    $user_self_assessment_result= $this->db  
                     ->query("SELECT * FROM `cv_self_assessment`
                         WHERE `user_ad_code` =  '$user_ad_code'
                         ORDER BY `self_assessment_id` DESC LIMIT 100")
                     ->result_array();
 
+                    $user_result[$index_user_result]['user_self_assessment_result'] = $user_self_assessment_result;
+                    
+                    
+                    for($index_user_self_assessment_result=0; $index_user_self_assessment_result < sizeof($user_self_assessment_result); $index_user_self_assessment_result++){
+
+                        $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
+                    
+                        if($nurse_comment_id != "0"){
+
+                            $nurse_comment_result = $this->db
+                            ->query("SELECT * FROM `cv_nurse_comment` WHERE `nurse_comment_id` =  '$nurse_comment_id'")
+                            ->result_array();
+
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = $nurse_comment_result;
+
+                        }else{
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = array();
+
+                        }
+
+                    }
                 }
 
                 // return array(  'status' => "true" , 'result' => $user_result);
@@ -172,6 +217,66 @@ class Model_Covid_Nurse extends CI_Model
 
     }
 
- 
+    public function Nurse_Comment_user_with_self_assessment_id($result){
+        if(isset($result['nurse_comment_ad_id'])){
+            if(isset($result['user_ad_code'])){
+                if(isset($result['nurse_comment_text'])){
+                    if(isset($result['self_assessment_id'])){
+
+                        $nurse_comment_ad_id    = $result['nurse_comment_ad_id'];
+                        $user_ad_code           = $result['user_ad_code'];
+                        $nurse_comment_text     = $result['nurse_comment_text'];
+                        $self_assessment_id     = $result['self_assessment_id'];
+                        // INSERT INTO `cv_nurse_comment` (`nurse_comment_id`, `nurse_comment_ad_id`, `nurse_comment_date_time`, `nurse_comment_text`, `user_ad_code`) VALUES (NULL, '003599', current_timestamp(), 'fghsfghsfghxfgh', '003599');
+
+                        $data = array(
+                            'nurse_comment_id' => NULL,
+                            'nurse_comment_ad_id' => $nurse_comment_ad_id,
+                            'nurse_comment_date_time' => date("Y-m-d h:i:s"),
+                            'nurse_comment_text' =>  $nurse_comment_text,
+                            'user_ad_code' => $user_ad_code
+                          
+                        );
+
+                        $this->db->insert('cv_nurse_comment', $data);
+
+                        if(($this->db->affected_rows() != 1) ? false : true){
+
+                            $query = $this->db
+                            ->query("SELECT * FROM `cv_nurse_comment` WHERE `nurse_comment_ad_id` = '$nurse_comment_ad_id' ORDER BY `nurse_comment_id` DESC LIMIT 1")
+                            ->result_array();
+                            //  return array(  'status' => "false" , 'result' => $query);
+                        }
+
+                        $data_update = array( 'nurse_comment_id' => $query[0]['nurse_comment_id']) ;
+
+                        $this->db->trans_begin();
+                        $this->db->where('self_assessment_id', $self_assessment_id)->set($data_update)->update('cv_self_assessment');
+                            
+                        if ($this->db->trans_status() === false) {
+                            $this->db->trans_rollback();
+                            return array(  'status' => "false" , 'result' => "trans_rollback");
+                        } else {
+                            $this->db->trans_commit();
+                         
+                            return array(  'status' => "true" , 'result' => "Nurse_Comment_True");
+                        }
+
+
+                    }else{
+                        return array(  'status' => "false" , 'result' => "request self_assessment_id");
+                    }
+                }else{
+                    return array(  'status' => "false" , 'result' => "request nurse_comment_text");
+                }
+            }else{
+                return array(  'status' => "false" , 'result' => "request user_ad_code");
+            }
+        }else{
+            return array(  'status' => "false" , 'result' => "request nurse_comment_ad_id");
+        }
+
+
+    }
 
 }
