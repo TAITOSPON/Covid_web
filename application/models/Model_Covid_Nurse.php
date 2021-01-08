@@ -42,10 +42,6 @@ class Model_Covid_Nurse extends CI_Model
     }
 
 
-
-
-
-
     public function Get_All_Dept_Name(){
 
         $user = $this->db->query("SELECT DISTINCT user_ad_dept_code FROM `cv_user_latest_status` INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code")->result_array();
@@ -161,6 +157,21 @@ class Model_Covid_Nurse extends CI_Model
 
                             }
 
+                            $doctor_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['doctor_approve_id'];
+
+                            if($doctor_approve_id != "0"){
+
+                                $doctor_approve_result = $this->db
+                                ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
+                                ->result_array();
+
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = $doctor_approve_result;
+
+                            }else{
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = array();
+
+                            }
+
                         }
                       
 
@@ -230,6 +241,21 @@ class Model_Covid_Nurse extends CI_Model
 
                         }else{
                             $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
+
+                        }
+
+                        $doctor_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['doctor_approve_id'];
+
+                        if($doctor_approve_id != "0"){
+
+                            $doctor_approve_result = $this->db
+                            ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
+                            ->result_array();
+
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = $doctor_approve_result;
+
+                        }else{
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = array();
 
                         }
 

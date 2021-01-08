@@ -380,7 +380,8 @@ class Model_Covid_User extends CI_Model
 
         // $data = array();
         // $data['1_Have_Fever'] = array('status' => "1");
-        // $data['2_Have_symptoms'] = array('status' => "1");
+
+        // $data['2_Have_symptoms'] = array(  'status'=>"1",'detail'=>"textdetaillll");
         // $data['3_Physician'] = array('status' => "1");
         // $data['4_Close_up_people_risk'] = array('status' => "1");
         // $data['5_Close_up_people_colds'] = array('status' => "1");
@@ -646,6 +647,23 @@ class Model_Covid_User extends CI_Model
 
                         }
 
+
+                        $doctor_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['doctor_approve_id'];
+
+                        if($doctor_approve_id != "0"){
+
+                            $doctor_approve_result = $this->db
+                            ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
+                            ->result_array();
+
+                            $query_user[$i]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = $doctor_approve_result;
+
+                        }else{
+                            $query_user[$i]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = array();
+
+                        }
+
+
                     }
         
         
@@ -710,6 +728,23 @@ class Model_Covid_User extends CI_Model
                             $query_user[$i]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
 
                         }
+
+
+                        $doctor_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['doctor_approve_id'];
+
+                        if($doctor_approve_id != "0"){
+
+                            $doctor_approve_result = $this->db
+                            ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
+                            ->result_array();
+
+                            $query_user[$i]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = $doctor_approve_result;
+
+                        }else{
+                            $query_user[$i]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = array();
+
+                        }
+
 
                     }
                   
@@ -821,12 +856,57 @@ class Model_Covid_User extends CI_Model
                 $query_detail[$i]['self_assessment_TextSpecific'] = $this->db
                 ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
                 ->result_array();
+
+                $nurse_comment_id = $query_detail[$i]['nurse_comment_id'];
+                        
+                if($nurse_comment_id != "0"){
+
+                    $nurse_comment_result = $this->db
+                    ->query("SELECT * FROM `cv_nurse_comment` WHERE `nurse_comment_id` =  '$nurse_comment_id'")
+                    ->result_array();
+
+
+                }else{
+                    $nurse_comment_result = array();
+
+                }
+
+                $chief_approve_id = $query_detail[$i]['chief_approve_id'];
+
+                if($chief_approve_id != "0"){
+
+                    $chief_approve_result = $this->db
+                    ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
+                    ->result_array();
+
+                }else{
+                    $chief_approve_result = array();
+
+                }
+
+                $doctor_approve_id = $query_detail[$i]['doctor_approve_id'];
+
+                if($doctor_approve_id != "0"){
+
+                    $doctor_approve_result = $this->db
+                    ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
+                    ->result_array();
+
+                }else{
+                    $doctor_approve_result = array();
+
+                }
+                
             }
 
+            
             $data = array( 
                 'chief_result' => array(json_decode($this->Get_id_chief_by_dapt_code($user_ad_code), true)),
                 'user_result' => $get_user_result,
-                'detail_self_assessment' => $query_detail
+                'detail_self_assessment' => $query_detail,
+                'nurse_comment_result' => $nurse_comment_result,
+                'chief_approve_result' => $chief_approve_result,
+                'doctor_approve_result' => $doctor_approve_result
                 
             );     
 
