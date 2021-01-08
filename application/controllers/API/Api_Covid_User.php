@@ -34,6 +34,13 @@ class Api_Covid_User extends REST_Controller{
               // echo $result;
    
        }
+
+
+       public function Check_self_assessment_latest_with_ad_code_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->Check_self_assessment_latest_with_ad_code($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
   
 
        public function GetSumStatus_get(){
@@ -122,6 +129,12 @@ class Api_Covid_User extends REST_Controller{
    
        }
 
+       public function Doctor_approve_status_wfh_post(){
+
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_Doctor->Doctor_approve_status_wfh($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);    
+       }
 
        
        // FOR Doctor +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

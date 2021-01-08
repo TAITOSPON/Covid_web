@@ -146,6 +146,21 @@ class Model_Covid_Nurse extends CI_Model
 
                             }
 
+                            $chief_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['chief_approve_id'];
+
+                            if($chief_approve_id != "0"){
+
+                                $chief_approve_result = $this->db
+                                ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
+                                ->result_array();
+
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = $chief_approve_result;
+
+                            }else{
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
+
+                            }
+
                         }
                       
 
@@ -199,6 +214,22 @@ class Model_Covid_Nurse extends CI_Model
 
                         }else{
                             $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = array();
+
+                        }
+
+
+                        $chief_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['chief_approve_id'];
+
+                        if($chief_approve_id != "0"){
+
+                            $chief_approve_result = $this->db
+                            ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
+                            ->result_array();
+
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = $chief_approve_result;
+
+                        }else{
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
 
                         }
 

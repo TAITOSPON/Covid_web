@@ -42,8 +42,6 @@ class Model_Covid_Doctor extends CI_Model
 
    
 
-
-
     public function Get_All_Dept_Name(){
         // $user = $this->db->query("SELECT DISTINCT user_ad_dept_code FROM cv_user")->result_array();
         $user = $this->db
@@ -151,6 +149,21 @@ class Model_Covid_Doctor extends CI_Model
 
                             }
 
+                            $chief_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['chief_approve_id'];
+
+                            if($chief_approve_id != "0"){
+
+                                $chief_approve_result = $this->db
+                                ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
+                                ->result_array();
+
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = $chief_approve_result;
+
+                            }else{
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
+
+                            }
+
                         }
     
                     }
@@ -205,6 +218,21 @@ class Model_Covid_Doctor extends CI_Model
 
                         }else{
                             $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = array();
+
+                        }
+
+                        $chief_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['chief_approve_id'];
+
+                        if($chief_approve_id != "0"){
+
+                            $chief_approve_result = $this->db
+                            ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
+                            ->result_array();
+
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = $chief_approve_result;
+
+                        }else{
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
 
                         }
 
@@ -294,6 +322,120 @@ class Model_Covid_Doctor extends CI_Model
             return array(  'status' => "false" , 'result' => "request self_assessment_id");
         }
 
+    }
+   
+
+    public function Doctor_approve_status_wfh($result){
+
+        if(isset($result['doctor_approve_by_id'])){
+
+            if(isset($result['user_ad_code'])){
+
+                if(isset($result['doctor_approve_detail'])){
+
+                    if(isset($result['doctor_approve_status_wfh'])){
+
+                        if(isset($result['doctor_approve_wfh_date_start'])){
+
+                            if(isset($result['doctor_approve_wfh_date_end'])){
+                                if(isset($result['self_assessment_id'])){
+
+
+                                    $doctor_approve_by_id = $result['doctor_approve_by_id'];
+                                    $user_ad_code = $result['user_ad_code'];
+                                    $doctor_approve_detail = $result['doctor_approve_detail'];
+                                    $doctor_approve_status_wfh = $result['doctor_approve_status_wfh'];
+                                    $doctor_approve_wfh_date_start = $result['doctor_approve_wfh_date_start'];
+                                    $doctor_approve_wfh_date_end = $result['doctor_approve_wfh_date_end'];
+                                    $self_assessment_id = $result['self_assessment_id'];
+            
+            
+                                    $data = array(
+                                        'doctor_approve_id' => NULL,
+                                        'user_ad_code' => $user_ad_code,
+                                        'doctor_approve_by_id' => $doctor_approve_by_id,
+                                        'doctor_approve_result' =>  "1",
+                                        'doctor_approve_datetime_create' => date("Y-m-d h:i:s"),
+                                        'doctor_approve_detail' =>  $doctor_approve_detail,
+                                        'doctor_approve_status_wfh' => $doctor_approve_status_wfh,
+                                        'doctor_approve_wfh_date_start' => $doctor_approve_wfh_date_start,
+                                        'doctor_approve_wfh_date_end' => $doctor_approve_wfh_date_end
+                                    );
+    
+                                    $this->db->insert('cv_doctor_approve', $data);
+                                    if(($this->db->affected_rows() != 1) ? false : true){
+                                   
+                                        $doctor_approve_result = $this->db
+                                        ->query("SELECT * FROM `cv_doctor_approve` WHERE `user_ad_code` = '$user_ad_code' ORDER BY `doctor_approve_id` DESC LIMIT 1")
+                                        ->result_array();
+
+                                        $this->db->trans_begin();
+                                        $this->db->where('self_assessment_id', $self_assessment_id)
+                                        ->set(
+                                            array( 
+        
+                                                'doctor_approve_result_check' => $doctor_approve_result[0]['doctor_approve_result'],
+                                                'doctor_approve_id' => $doctor_approve_result[0]['doctor_approve_id'] 
+        
+                                                )) ->update('cv_self_assessment');
+        
+                
+                                        if ($this->db->trans_status() === false) {
+                                            $this->db->trans_rollback();
+                                            return  array(  'status' => "false" , 'result' => "update cv_self_assessment_false" );
+                                        } else {
+                                            $this->db->trans_commit();
+             
+
+                                                $this->db->trans_begin();
+                                                $this->db->where('user_ad_code', $user_ad_code)
+                                                ->set(
+                                                    array( 
+                
+                                                        'doctor_approve_result_check' => $doctor_approve_result[0]['doctor_approve_result'],
+                                                        'doctor_approve_id' => $doctor_approve_result[0]['doctor_approve_id'] 
+                
+                                                        )) ->update('cv_user_latest_status');
+                
+                        
+                                                if ($this->db->trans_status() === false) {
+                                                    $this->db->trans_rollback();
+                                                    return  array(  'status' => "false" , 'result' => "update cv_user_latest_status" );
+                                                } else {
+                                                    $this->db->trans_commit();
+                                                        return array(  'status' => "true" , 'result' => "doctor_approve_wfh true");
+        
+                                                        //UPDATE cv_user_latest_status
+                                                }
+                                        }
+                            
+                                    }
+    
+
+
+                                }else{
+                                    return array(  'status' => "false" , 'result' => "request self_assessment_id");
+                                }
+                            }else{
+                                return array(  'status' => "false" , 'result' => "request doctor_approve_wfh_date_end");
+                            }
+                        }else{
+                            return array(  'status' => "false" , 'result' => "request doctor_approve_wfh_date_start");
+                        }
+                    }else{
+                        return array(  'status' => "false" , 'result' => "request doctor_approve_status_wfh");
+                    }
+                }else{
+                    return array(  'status' => "false" , 'result' => "request doctor_approve_detail");
+                }
+            }else{
+                return array(  'status' => "false" , 'result' => "request user_ad_code");
+            }
+        }else{
+            return array(  'status' => "false" , 'result' => "request doctor_approve_by_id");
+        }
+
+        
     }
 
    
