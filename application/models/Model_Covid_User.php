@@ -112,9 +112,8 @@ class Model_Covid_User extends CI_Model
                     );
                 
                 $this->db->insert('cv_user', $data);
-                $this->Set_self_assessment($result);
-
-                return $this->Get_User_case($result);
+                return $this->Set_self_assessment($result); 
+                // return $this->Get_User_case($result);
 
             }else if($count == "1"){
 
@@ -138,8 +137,8 @@ class Model_Covid_User extends CI_Model
                     return $status;
                 } else {
                     $this->db->trans_commit();
-                    $this->Set_self_assessment($result);
-                    return $this->Get_User_case($result);
+                    return $this->Set_self_assessment($result);
+                    // return $this->Get_User_case($result);
                    
                 }
             }
@@ -223,11 +222,11 @@ class Model_Covid_User extends CI_Model
 
     }
    
-    public function Get_User_case($result){
+    public function Get_User_case($result,$self_assessment_result){
 
         if($result['self_assessment_result_specific'] == "1"){
             $case = array( 
-                'self_assessment_id' => $result['self_assessment_id'],
+                'self_assessment_id' => $self_assessment_result[0]['self_assessment_id'],
                 'normal_case' => $this->db
                     ->where('self_assessment_criterion_id',$result["self_assessment_result"])
                     ->get('cv_self_assessment_criterion')
@@ -246,7 +245,7 @@ class Model_Covid_User extends CI_Model
             return  $status;    
         }else{
             $case = array( 
-                'self_assessment_id' => $result['self_assessment_id'],
+                'self_assessment_id' => $self_assessment_result[0]['self_assessment_id'],
                 'normal_case' => $this->db
                     ->where('self_assessment_criterion_id',$result["self_assessment_result"])
                     ->get('cv_self_assessment_criterion')
@@ -262,7 +261,9 @@ class Model_Covid_User extends CI_Model
             );
     
             return  $status;    
-        }    
+        }
+        
+     
        
     }
 
@@ -307,9 +308,22 @@ class Model_Covid_User extends CI_Model
         }
 
         $this->db->insert('cv_self_assessment', $data);
+        if(($this->db->affected_rows() != 1) ? false : true){
 
-        $this->Update_User_latest_status($result);
-  
+            $user_ad_code = $result['user_ad_code'];
+            $self_assessment_result = $this->db
+            ->query("SELECT * FROM `cv_self_assessment` 
+                WHERE user_ad_code = '$user_ad_code'
+                ORDER BY `self_assessment_id`  DESC LIMIT 1")
+            ->result_array();
+            
+            $this->Update_User_latest_status($result);
+            return $this->Get_User_case($result,$self_assessment_result);
+         
+        }
+
+    
+     
     }
 
 
@@ -434,32 +448,69 @@ class Model_Covid_User extends CI_Model
         if(isset($result['user_ad_code'])){
             $user_ad_code = $result['user_ad_code'];
 
-            $self_assessment_latest = $this->db
+            $self_assessment_result = $this->db
             ->query("SELECT * FROM `cv_self_assessment`  
                 WHERE user_ad_code ='$user_ad_code'
                 ORDER BY `cv_self_assessment`.`self_assessment_id`  DESC
                 LIMIT 1")
             ->result_array();
 
-            if($self_assessment_latest[0]['self_assessment_detail_id'] == "0"){
-                if($self_assessment_latest[0]['self_assessment_sum_result'] == "2" || $self_assessment_latest[0]['self_assessment_sum_result'] == "3"){
-                    if($self_assessment_latest[0]['chief_approve_result_check'] == "0" || $self_assessment_latest[0]['chief_approve_result_check'] == "2"){
+            if(sizeof($self_assessment_result) != 0){
+                // print_r(sizeof($self_assessment_result)); exit();
+      
+                $latest_status_result = $this->db
+                ->query("SELECT * FROM `cv_user_latest_status` WHERE user_ad_code = '$user_ad_code'")
+                ->result_array();
 
-                        // work from 2 only
-                        return  array(  'status' => "true" , 'result' => array('status'=>"false" , 'self_assessment_id' => $self_assessment_latest[0]['self_assessment_id']));
-
-
+                if(sizeof($latest_status_result) != 0){
+            
+        
+                    if($latest_status_result[0]['self_assessment_sum_result'] == "2" || $latest_status_result[0]['self_assessment_sum_result'] == "3"){
+                        if($latest_status_result[0]['chief_approve_result_check'] == "0" || $latest_status_result[0]['chief_approve_result_check'] == "2"){
+        
+                            for($i=0; $i < sizeof($self_assessment_result); $i++){
+        
+                                $self_assessment_result_Normal = $self_assessment_result[$i]["self_assessment_result"];
+                                $self_assessment_result_specific = $self_assessment_result[$i]["self_assessment_result_specific"];
+                            
+                                $self_assessment_result[$i]['self_assessment_TextNormal'] = $this->db
+                                ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_Normal'")
+                                ->result_array();
+                
+                                $self_assessment_result[$i]['self_assessment_TextSpecific'] = $this->db
+                                ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                                ->result_array();
+                            }
+                
+                            
+                            // work from 2 only
+                            return  array(  'status' => "true" , 'result' =>
+                            array(
+                                'status'=>"false" , 
+                                'self_assessment_id' => $self_assessment_result[0]['self_assessment_id'],
+                                "self_assessment_result" => $self_assessment_result,
+                                ));
+        
+                                
+        
+        
+                        }else{
+                                return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                        }
                     }else{
-                          return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                        return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                     }
+
                 }else{
                     return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                 }
+    
             }else{
                 return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
             }
 
-
+           
+       
         }else{
             return  array(  'status' => "false" , 'result' => "request user_ad_code" );
         }
@@ -507,6 +558,11 @@ class Model_Covid_User extends CI_Model
             $data['chief_approve_id'] = "0";
     
             $this->db->insert('cv_user_latest_status', $data);
+            if(($this->db->affected_rows() != 1) ? false : true){
+
+                $this->Alert_to_Chief($user_ad_code);
+
+            }
 
         }else if($count == "1"){
 
@@ -541,7 +597,7 @@ class Model_Covid_User extends CI_Model
             } else {
                 $this->db->trans_commit();
 
-               
+                $this->Alert_to_Chief($user_ad_code);
             }
         }
 
@@ -1056,6 +1112,52 @@ class Model_Covid_User extends CI_Model
 
     }
 
+
+
+
+    public function Alert_to_Chief($user_ad_code){
+        $user_ad_code = "003599";
+
+        $detail_user = $this->db->query("SELECT * FROM cv_user_latest_status WHERE user_ad_code = '$user_ad_code'")->result_array();
+
+        $chief_result = array(json_decode($this->Get_id_chief_by_dapt_code($user_ad_code), true));
+
+
+        if(sizeof($chief_result) != 0){
+           
+           
+            $user_ad_id_recrive = $chief_result[0]['PN_NO'];
+
+            if($detail_user[0]['self_assessment_sum_result'] == "2" || $detail_user[0]['self_assessment_sum_result'] == "3"){
+    
+             
+                $data = array(
+                    'header' => array(array("User-Agent" => "back_end_Covid")),
+                    'body' => array(array("user_ad_id_recrive" => "003599" , 'text' =>"asdsdfsdf" )),
+                    'detail' => "sdfgsdfgsdfgsdfgsdfgsdfg",
+    
+                );
+    
+                
+    
+                // $ch = curl_init();
+                // curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
+                // curl_setopt($ch, CURLOPT_POST, true);
+                // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
+                // $result = curl_exec($ch);
+                // curl_close($ch);
+                // return  $result;
+    
+    
+            }
+          
+
+        }
+
+    }
 
    
 } 

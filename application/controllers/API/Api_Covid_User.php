@@ -47,6 +47,12 @@ class Api_Covid_User extends REST_Controller{
               $result = $this->Model_Covid_User->Get_Sum_Status();  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
+
+
+       public function Alert_get(){
+              $result = $this->Model_Covid_User->Alert_to_Chief();  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
        // FOR USER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
