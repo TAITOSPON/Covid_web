@@ -35,7 +35,6 @@ class Api_Covid_User extends REST_Controller{
    
        }
 
-
        public function Check_self_assessment_latest_with_ad_code_post(){
               $data = json_decode(file_get_contents('php://input'), true);
               $result = $this->Model_Covid_User->Check_self_assessment_latest_with_ad_code($data);  
@@ -43,16 +42,38 @@ class Api_Covid_User extends REST_Controller{
        }
   
 
+       public function Check_Chief_High_Level_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->Get_List_Underline_by_user_ad_boss($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
+
        public function GetSumStatus_get(){
               $result = $this->Model_Covid_User->Get_Sum_Status();  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
 
 
-       public function Alert_get(){
-              $result = $this->Model_Covid_User->Alert_to_Chief();  
+
+       public function User_get_history_all_form_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->User_get_history_all_form($data);  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
+
+       public function Get_detail_self_assessment_with_id_and_check_boss_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->Get_detail_self_assessment_with_id_and_check_boss($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
+
+       public function Alert_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              // $result = $this->Model_Covid_User->Alert_to_Chief($data['user_ad_code']);  
+              $result = $this->Model_Covid_User->Alert_to_Doctor();  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
+
        // FOR USER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 

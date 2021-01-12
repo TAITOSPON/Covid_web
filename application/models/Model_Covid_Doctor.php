@@ -134,6 +134,18 @@ class Model_Covid_Doctor extends CI_Model
 
                         for($index_user_self_assessment_result=0; $index_user_self_assessment_result < sizeof($user_self_assessment_result); $index_user_self_assessment_result++){
 
+
+                            $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
+                            $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                            
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
+                            ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                            ->result_array();
+            
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                            ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                            ->result_array();
+
                             $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
                         
                             if($nurse_comment_id != "0"){
@@ -220,6 +232,18 @@ class Model_Covid_Doctor extends CI_Model
                     $user_result[$index_user_result]['user_self_assessment_result'] = $user_self_assessment_result;
 
                     for($index_user_self_assessment_result=0; $index_user_self_assessment_result < sizeof($user_self_assessment_result); $index_user_self_assessment_result++){
+
+
+                        $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
+                        $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                        
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
+                        ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                        ->result_array();
+        
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                        ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                        ->result_array();
 
                         $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
                     
@@ -431,20 +455,28 @@ class Model_Covid_Doctor extends CI_Model
                                             return  array(  'status' => "false" , 'result' => "update cv_self_assessment_false" );
                                         } else {
                                             $this->db->trans_commit();
-             
 
-                                                $this->db->trans_begin();
-                                                $this->db->where('user_ad_code', $user_ad_code)
-                                                ->set(
-                                                    array( 
-                
+                                                if($doctor_approve_result[0]['doctor_approve_status_wfh'] == "2"){
+
+                                                    $data = array(
+                                                        'doctor_approve_result_check' => $doctor_approve_result[0]['doctor_approve_result'],
+                                                        'doctor_approve_id' => $doctor_approve_result[0]['doctor_approve_id'],
+                                                        'doctor_approve_status_wfh' => $doctor_approve_result[0]['doctor_approve_status_wfh'],
+                                                        'self_assessment_sum_result' => "1"
+                                                    );
+
+                                                }else{
+                                                    $data = array(
                                                         'doctor_approve_result_check' => $doctor_approve_result[0]['doctor_approve_result'],
                                                         'doctor_approve_id' => $doctor_approve_result[0]['doctor_approve_id'],
                                                         'doctor_approve_status_wfh' => $doctor_approve_result[0]['doctor_approve_status_wfh'],
                 
-                                                        )) ->update('cv_user_latest_status');
+                                                    );
+                                                }
+
+                                                $this->db->trans_begin();
+                                                $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user_latest_status');
                 
-                        
                                                 if ($this->db->trans_status() === false) {
                                                     $this->db->trans_rollback();
                                                     return  array(  'status' => "false" , 'result' => "update cv_user_latest_status" );

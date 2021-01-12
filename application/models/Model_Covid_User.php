@@ -79,6 +79,40 @@ class Model_Covid_User extends CI_Model
     }
 
 
+    public function Get_List_Underline_by_user_ad_boss($result){
+
+        if(isset($result['user_ad_code'])){
+            $user_ad_code = $result['user_ad_code'];
+
+            $member_boss = $this->db->query("SELECT * FROM `cv_member_rule` WHERE member_ad_boss = $user_ad_code")
+            ->result_array();  
+
+            if(sizeof($member_boss) != 0){
+
+                return  array(  'status' => "true" , 'result' => array(  'status_boss' => "true" , 'result' => $member_boss ) );
+            }else{
+                return  array(  'status' => "true" , 'result' => array(  'status_boss' => "false" , 'result' => "not_boss" ) ); 
+            }
+
+        
+        
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
+        }
+
+
+
+
+    }
+
+    public function Get_Boss_by_ad_Director($user_ad_code){
+
+        $member_boss = $this->db->query("SELECT * FROM `cv_member_rule` WHERE user_ad_code = $user_ad_code")
+        ->result_array();  
+
+        return $member_boss;
+    }
+
     public function Set_user_ad($result) {
 
         $status_data = $this->CheckData($result);
@@ -317,7 +351,7 @@ class Model_Covid_User extends CI_Model
                 ORDER BY `self_assessment_id`  DESC LIMIT 1")
             ->result_array();
             
-            $this->Update_User_latest_status($result);
+            $this->Update_User_latest_status($result,$self_assessment_result);
             return $this->Get_User_case($result,$self_assessment_result);
          
         }
@@ -339,9 +373,11 @@ class Model_Covid_User extends CI_Model
                     // INSERT INTO `cv_self_assessment_detail` (`self_assessment_detail_id`, `self_assessment_detail_result`, `self_assessment_detail_date_time`) VALUES (NULL, 'se', current_timestamp());
                    
                     $user_ad_code = $result['user_ad_code'];
+                    $self_assessment_id = $result['self_assessment_id'];
 
                     $data = array(
                         'self_assessment_detail_id' => NULL,
+                        'self_assessment_id' => $self_assessment_id,
                         'user_ad_code' => $user_ad_code,
                         'self_assessment_detail_result' => json_encode($result['self_assessment_detail_result']),
                         'self_assessment_detail_date_time' => date("Y-m-d h:i:s")
@@ -521,7 +557,7 @@ class Model_Covid_User extends CI_Model
 
 
 
-    public function Update_User_latest_status($result){
+    public function Update_User_latest_status($result,$self_assessment_result){
 
       
         $user_ad_code =  $result['user_ad_code'];
@@ -560,7 +596,7 @@ class Model_Covid_User extends CI_Model
             $this->db->insert('cv_user_latest_status', $data);
             if(($this->db->affected_rows() != 1) ? false : true){
 
-                $this->Alert_to_Chief($user_ad_code);
+                $this->Alert_to_Chief($user_ad_code,$self_assessment_result);
 
             }
 
@@ -597,7 +633,7 @@ class Model_Covid_User extends CI_Model
             } else {
                 $this->db->trans_commit();
 
-                $this->Alert_to_Chief($user_ad_code);
+                $this->Alert_to_Chief($user_ad_code,$self_assessment_result);
             }
         }
 
@@ -637,6 +673,138 @@ class Model_Covid_User extends CI_Model
         
 
         return $result;
+    }
+
+
+    public function User_get_history_all_form($result){
+        if(isset($result['user_ad_code'])){
+
+            $user_ad_code = $result['user_ad_code'];
+
+            $user_result = $this->db
+                ->query("SELECT * FROM `cv_user_latest_status`
+                    INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
+                    WHERE `cv_user`.user_ad_code  = '$user_ad_code'")
+                ->result_array();
+
+            // print_r($user_result); exit(); 
+
+
+           
+            for($index_user_result=0; $index_user_result < sizeof($user_result); $index_user_result++){
+                    
+                $user_ad_code = $user_result[$index_user_result]['user_ad_code'];
+                
+               
+                $user_self_assessment_result= $this->db  
+                ->query("SELECT * FROM `cv_self_assessment`
+                    WHERE `user_ad_code` =  '$user_ad_code'
+                    ORDER BY `self_assessment_id` DESC LIMIT 100")
+                ->result_array();
+
+
+                $user_result[$index_user_result]['user_self_assessment_result'] = $user_self_assessment_result;
+                
+                
+                for($index_user_self_assessment_result=0; $index_user_self_assessment_result < sizeof($user_self_assessment_result); $index_user_self_assessment_result++){
+
+
+
+                    $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
+                    $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                    
+                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
+                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                    ->result_array();
+    
+                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                    ->result_array();
+
+
+
+                    $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
+                
+                    if($nurse_comment_id != "0"){
+
+                        $nurse_comment_result = $this->db
+                        ->query("SELECT * FROM `cv_nurse_comment` WHERE `nurse_comment_id` =  '$nurse_comment_id'")
+                        ->result_array();
+
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = $nurse_comment_result;
+
+                    }else{
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = array();
+
+                    }
+
+
+                    $chief_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['chief_approve_id'];
+
+                    if($chief_approve_id != "0"){
+
+                        $chief_approve_result = $this->db
+                        ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
+                        ->result_array();
+
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = $chief_approve_result;
+
+                    }else{
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
+
+                    }
+
+                    $doctor_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['doctor_approve_id'];
+
+                    if($doctor_approve_id != "0"){
+
+                        $doctor_approve_result = $this->db
+                        ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
+                        ->result_array();
+
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = $doctor_approve_result;
+
+                    }else{
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = array();
+
+                    }
+
+ 
+                    $self_assessment_id = $user_self_assessment_result[$index_user_self_assessment_result]['self_assessment_id'];
+                    $user_self_assessment_result_detail = $this->db
+                    ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id'")
+                    ->result_array();
+
+          
+                    if(sizeof($user_self_assessment_result_detail) != 0){
+
+        
+
+                        for($index_user_self_assessment_result_detail=0; $index_user_self_assessment_result_detail < sizeof($user_self_assessment_result_detail); $index_user_self_assessment_result_detail++){
+                          
+                            $self_assessment_detail_result = array(json_decode($user_self_assessment_result_detail[$index_user_self_assessment_result_detail]['self_assessment_detail_result'], true));  
+
+                            $user_self_assessment_result_detail[$index_user_self_assessment_result_detail]['self_assessment_detail_result'] =  $self_assessment_detail_result ;
+
+                        }
+                        
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['user_self_assessment_result_detail'] = $user_self_assessment_result_detail;
+                    }else{
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['user_self_assessment_result_detail'] = array();
+                    }
+                   
+                   
+
+                }
+            }
+
+            return  array(  'status' => "true" , 'result' => $user_result);
+
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
+        }
+        
+
     }
 
 
@@ -821,7 +989,6 @@ class Model_Covid_User extends CI_Model
     }
 
 
-
     public function Get_detail_self_assessment_history_with_id($result){
         if(isset($result['user_ad_code'])){
 
@@ -984,6 +1151,82 @@ class Model_Covid_User extends CI_Model
         }
     }
 
+    public function Get_detail_self_assessment_with_id_and_check_boss($result){
+        if(isset($result['self_assessment_id'])){
+
+
+              
+            $self_assessment_id = $result['self_assessment_id'];
+
+            $self_assessment_result = $this->db
+            ->query("SELECT * FROM `cv_self_assessment` WHERE  self_assessment_id= '$self_assessment_id'")
+            ->result_array();
+            // print_r($this->db->last_query());  exit();
+
+            if(sizeof($self_assessment_result) != 0){
+
+                $user_ad_code =  $self_assessment_result[0]['user_ad_code']; 
+               
+                $get_user_result = $this->db
+                ->query("SELECT * FROM `cv_user_latest_status`INNER JOIN `cv_user` 
+                    ON `cv_user`.user_ad_code =  `cv_user_latest_status`.user_ad_code  
+                    WHERE `cv_user`.user_ad_code = '$user_ad_code' ")
+                ->result_array();
+        
+               
+                for($i=0; $i < sizeof($self_assessment_result); $i++){
+    
+                    $self_assessment_result_normal = $self_assessment_result[$i]["self_assessment_result"];
+                    $self_assessment_result_specific = $self_assessment_result[$i]["self_assessment_result_specific"];
+                   
+                    $self_assessment_result[$i]['self_assessment_TextNormal'] = $this->db
+                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_normal'")
+                    ->result_array();
+    
+                    $self_assessment_result[$i]['self_assessment_TextSpecific'] = $this->db
+                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                    ->result_array();
+                }
+    
+                $result_boss = array(json_decode($this->Get_id_chief_by_dapt_code($user_ad_code), true));
+       
+
+                if($user_ad_code == $result_boss[0]['PN_NO'] ){
+                    $get_high_level =  $this->db
+                    ->query("SELECT * FROM `cv_member_rule` WHERE user_ad_code = '$user_ad_code'")
+                    ->result_array();
+                    $ad_boss = array(array('user_ad_boss' => $get_high_level[0]['member_ad_boss'] , 'user_ad_boss_name' => $get_high_level[0]['member_name_boss']));
+                   
+                }else{
+                   
+                    $ad_boss = array(array('user_ad_boss' => $result_boss[0]['PN_NO']  , 'user_ad_boss_name' => $result_boss[0]['FULL_NAME']));
+                }
+    
+                $data = array( 
+                    'chief_result' => $ad_boss,
+                    'user_result' => $get_user_result,
+                    'detail_self_assessment' => $self_assessment_result
+                   
+                );     
+    
+                $result = array( 
+                    'status' => "true",
+                    'result' => $data
+                        
+                );     
+                
+               return $result;
+
+            }else{
+                return  array(  'status' => "false" , 'result' => "self_assessment_result null" );
+            }
+          
+
+        }else{
+            return  array(  'status' => "false" , 'result' => "request self_assessment_id" );
+        }
+    }
+
 
     public function Chief_approve($result){
         // INSERT INTO `cv_chief_approve` (`chief_approve_id`, `chief_approve_by_id`, `chief_approve_datetime`, `chief_approve_result_check`) VALUES (NULL, '003599', '2020-12-30 13:51:29', '1');
@@ -1015,9 +1258,7 @@ class Model_Covid_User extends CI_Model
                                 $query = $this->db
                                 ->query("SELECT * FROM `cv_chief_approve` WHERE `user_ad_code` = '$user_ad_code' ORDER BY `chief_approve_id` DESC LIMIT 1")
                                 ->result_array();
-                                //   print_r($this->db->last_query());  exit();
                                 
-                                // print_r($query); exit();
                                 // update cv_user_latest_status
                                 $this->db->trans_begin();
                                 $this->db->where('user_ad_code', $user_ad_code)
@@ -1055,6 +1296,12 @@ class Model_Covid_User extends CI_Model
                                     } else {
                                         $this->db->trans_commit();
 
+                                        if($query[0]['chief_approve_result_check'] == "2"){
+                                  
+                                            $this->Alert_to_Doctor($self_assessment_id);
+                                           
+                                        }
+        
                                         //update cv_user_latest_status
                                         // print_r($query[0]); exit();
                                         if($query[0]['chief_approve_result_check'] == "1"){
@@ -1114,50 +1361,194 @@ class Model_Covid_User extends CI_Model
 
 
 
-
-    public function Alert_to_Chief($user_ad_code){
-        $user_ad_code = "003599";
-
-        $detail_user = $this->db->query("SELECT * FROM cv_user_latest_status WHERE user_ad_code = '$user_ad_code'")->result_array();
+    public function Alert_to_Chief($user_ad_code,$self_assessment_result){
+  
+        $detail_user = $this->db
+        ->query("SELECT * FROM `cv_user_latest_status`
+            INNER JOIN `cv_user` ON `cv_user`.user_ad_code =  `cv_user_latest_status`.user_ad_code  
+            WHERE `cv_user`.user_ad_code = '$user_ad_code'")
+        ->result_array();
 
         $chief_result = array(json_decode($this->Get_id_chief_by_dapt_code($user_ad_code), true));
 
-
-        if(sizeof($chief_result) != 0){
-           
-           
-            $user_ad_id_recrive = $chief_result[0]['PN_NO'];
-
-            if($detail_user[0]['self_assessment_sum_result'] == "2" || $detail_user[0]['self_assessment_sum_result'] == "3"){
-    
-             
-                $data = array(
-                    'header' => array(array("User-Agent" => "back_end_Covid")),
-                    'body' => array(array("user_ad_id_recrive" => "003599" , 'text' =>"asdsdfsdf" )),
-                    'detail' => "sdfgsdfgsdfgsdfgsdfgsdfg",
-    
-                );
-    
+        if(sizeof($detail_user) != 0){
+            
+            if($detail_user[0]['self_assessment_sum_result'] == "2" || $detail_user[0]['self_assessment_sum_result'] == "3"){ 
                 
+            
+                if(sizeof($chief_result) != 0){
+
+                    $user_ad_name = $detail_user[0]['user_ad_name'];
+                    $user_ad_tel = $detail_user[0]['user_ad_tel'];
+                    $user_ad_dept_name = $detail_user[0]['user_ad_dept_name'];
+                    $self_assessment_id = $self_assessment_result[0]['self_assessment_id'];
+                    // $self_assessment_id = "264";
+      
+                    $liff = "line://app/1655109480-2XKglnaX?liff.state=";
+                    $path = "Covid19_boss/".$self_assessment_id;
+                    $url = $liff.urlencode($path);
+
+                    //ALERT TO NURSE ============================================================================
+                    $text_nurse = "แจ้งเตือน คุณพยาบาลและคณะ".
+                    "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+                    "\n".$user_ad_dept_name.
+                    "\nโทร. ".$user_ad_tel.
+                    "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
+
+                    $this->Alert_to_Nurse($text_nurse);
     
-                // $ch = curl_init();
-                // curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
-                // curl_setopt($ch, CURLOPT_POST, true);
-                // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-                // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
-                // $result = curl_exec($ch);
-                // curl_close($ch);
-                // return  $result;
+                    if( $user_ad_code == $chief_result[0]['PN_NO'] ){
     
+                        // user is Director
+                        $boss_result = $this->Get_Boss_by_ad_Director($user_ad_code);
+                
+                        if(sizeof($boss_result) != 0){
+
+                            // $user_ad_id_recrive = "003599";
+                            $user_ad_id_recrive = $boss_result[0]['member_ad_boss'];
+                            $user_ad_id_recrive_name =  $chief_result[0]['member_name_boss'];
+                           
+                            
+                            $text = "แจ้งเตือน ".$user_ad_id_recrive_name.
+                            "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+                            "\n".$user_ad_dept_name.
+                            "\nโทร. ".$user_ad_tel.
+                            "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจาก\n".$url."\n\nหรือจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
+
+                            $data = array(
+                                'header' => array(array("User-Agent" => "back_end_Covid")),
+                                'body' => array(array("user_ad_id_recrive" => $user_ad_id_recrive , 'text' => $text )),
+                                'detail' => "sdfgsdfgsdfgsdfgsdfgsdfg",
+                
+                            );
+                            return $data;
+                            
+                            // $ch = curl_init();
+                            // curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
+                            // curl_setopt($ch, CURLOPT_POST, true);
+                            // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                            // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
+                            // $result = curl_exec($ch);
+                            // curl_close($ch);
+                            // return  $result;
+
+
+               
+                          
+                        }
+    
+                    }else{
+
+                        // $user_ad_id_recrive = "003599";
+                        $user_ad_id_recrive = $chief_result[0]['PN_NO'];
+                        $user_ad_id_recrive_name =  $chief_result[0]['FULL_NAME'];
+                        $user_ad_id_recrive_dept_name = $chief_result[0]['DEPT_NAME'];
+
+                    
+                        $text = "แจ้งเตือน ".$user_ad_id_recrive_name.
+                        "\n".$user_ad_id_recrive_dept_name.
+                        "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+                        "\n".$user_ad_dept_name.
+                        "\nโทร. ".$user_ad_tel.
+                        "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจาก\n".$url."\n\nหรือจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
+
+
+                        $data = array(
+                            'header' => array(array("User-Agent" => "back_end_Covid")),
+                            'body' => array(array("user_ad_id_recrive" => $user_ad_id_recrive , 'text' => $text )),
+                            'detail' => "alert",
+            
+                        );
+
+                        return $data;
+                        
+            
+                        
+                        // $ch = curl_init();
+                        // curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
+                        // curl_setopt($ch, CURLOPT_POST, true);
+                        // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                        // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
+                        // $result = curl_exec($ch);
+                        // curl_close($ch);
+                        // return  $result;
+                
+                      
+                    }         
+                }
     
             }
-          
-
         }
 
     }
+
+
+    public function Alert_to_Doctor($self_assessment_id){
+
+        // $self_assessment_id = "360";
+        
+        $self_assessment_result = $this->db
+        ->query("SELECT * FROM `cv_self_assessment`WHERE self_assessment_id = '$self_assessment_id'")
+        ->result_array();
+
+      
+        $user_ad_code = $self_assessment_result[0]['user_ad_code'];
+
+        $detail_user = $this->db
+        ->query("SELECT * FROM `cv_user_latest_status`
+            INNER JOIN `cv_user` ON `cv_user`.user_ad_code =  `cv_user_latest_status`.user_ad_code  
+            WHERE `cv_user`.user_ad_code = '$user_ad_code'")
+        ->result_array();
+
+        $chief_approve_id = $self_assessment_result[0]['chief_approve_id'];
+
+        $chief_approve_result = $this->db
+        ->query("SELECT * FROM `cv_chief_approve` WHERE chief_approve_id = '$chief_approve_id'")
+        ->result_array();
+
+
+        $chief_approve_detail = json_decode($this->Get_user_detail($chief_approve_result[0]['chief_approve_by_id']), true);
+
+        $chief_approve_name = $chief_approve_detail['result']['personal']['PersonalName']; 
+        $chief_approve_dept_name = $chief_approve_detail['result']['personal']['Department']; 
+
+        
+        $user_ad_name = $detail_user[0]['user_ad_name'];
+        $user_ad_tel = $detail_user[0]['user_ad_tel'];
+        $user_ad_dept_name = $detail_user[0]['user_ad_dept_name'];
+    
+        $text_nurse = "แจ้งเตือน คุณหมอ".
+        "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+        "\n".$user_ad_dept_name.
+        "\nโทร. ".$user_ad_tel.
+        "\n\nเข้าเกณฑ์มีความเสี่ยง \nยืนยันข้อมูลจาก ".$chief_approve_name."\n".$chief_approve_dept_name."\n\nกรุณาตรวจสอบข้อมูลจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
+
+        $this->Alert_to_Nurse($text_nurse);
+        // print_r($text_nurse); exit();
+         
+        
+    }
+
+    public function Alert_to_Nurse($text){
+
+        $line_token = "CedBa3gSQAB8GBN3chetiN9jNUaywR4Xk4hSMzxasRf";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://notify-api.line.me/api/notify');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded' , 'Authorization: Bearer '.$line_token));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS,  "message=".$text );
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return  $result;
+    }
+
+
 
    
 } 
