@@ -78,6 +78,52 @@ class Model_Covid_User extends CI_Model
         return $date;
     }
 
+    public function Check_user_policy($result){
+       
+        if(isset($result['user_ad_code'])){
+            $user_ad_code = $result['user_ad_code'];
+
+            $query = $this->db
+            ->query(" SELECT * FROM `cv_user_policy`  
+                WHERE user_ad_code = '$user_ad_code'
+                ORDER BY `cv_user_policy`.`user_policy_id`  DESC LIMIT 1")
+            ->result_array();
+            
+            if(sizeof($query)!= 0){
+                return  array(  'status' => "true" , 'result' => array('user_ad_code' => $user_ad_code , 'user_policy_status_approve_policy' => $query[0]['user_policy_status_approve_policy'] ) );
+            }else{
+                return  array(  'status' => "true" , 'result' => array('user_ad_code' => $user_ad_code , 'user_policy_status_approve_policy' =>"0" ) );
+            }
+
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
+        }
+    }
+
+    public function User_approve_policy($result){
+        // INSERT INTO `cv_user_policy` (`user_ad_code`, `user_policy_status_approve_policy`, `user_policy_datetime`) VALUES ('003599', '0', '2021-01-13 10:38:35');
+
+        if(isset($result['user_ad_code'])){
+            $user_ad_code = $result['user_ad_code'];
+
+            $data = array(
+                'user_ad_code' => $user_ad_code, 
+                'user_policy_status_approve_policy' => "1",
+                'user_policy_datetime' => date("Y-m-d h:i:s"),
+            );
+        
+            $this->db->insert('cv_user_policy', $data);
+            if(($this->db->affected_rows() != 1) ? false : true){
+                return  array(  'status' => "true" , 'result' => "user approve polivy true" );
+            }else{
+                return  array(  'status' => "false" , 'result' => "user approve polivy false" );
+            }
+
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
+        }
+        
+    }
 
     public function Check_user_member_type($result){
         if(isset($result['user_ad_code'])){
@@ -1444,15 +1490,15 @@ class Model_Covid_User extends CI_Model
                             );
                             // return $data;
                             
-                            // $ch = curl_init();
-                            // curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
-                            // curl_setopt($ch, CURLOPT_POST, true);
-                            // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-                            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                            // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                            // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
-                            // $result = curl_exec($ch);
-                            // curl_close($ch);
+                            $ch = curl_init();
+                            curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
+                            $result = curl_exec($ch);
+                            curl_close($ch);
                             // return  $result;
 
 
@@ -1487,15 +1533,15 @@ class Model_Covid_User extends CI_Model
                         
             
                         
-                        // $ch = curl_init();
-                        // curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
-                        // curl_setopt($ch, CURLOPT_POST, true);
-                        // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-                        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                        // curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
-                        // $result = curl_exec($ch);
-                        // curl_close($ch);
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
+                        curl_setopt($ch, CURLOPT_POST, true);
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
+                        $result = curl_exec($ch);
+                        curl_close($ch);
                         // return  $result;
                 
                       

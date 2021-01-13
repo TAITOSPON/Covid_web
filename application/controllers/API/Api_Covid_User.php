@@ -17,6 +17,19 @@ class Api_Covid_User extends REST_Controller{
        }
 
        // FOR USER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+       public function Check_user_policy_post(){
+              
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->Check_user_policy($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
+
+       public function User_approve_policy_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->User_approve_policy($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+              
+       }
 
        public function Check_user_member_type_post(){
               $data = json_decode(file_get_contents('php://input'), true);
