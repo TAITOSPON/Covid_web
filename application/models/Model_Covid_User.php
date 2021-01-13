@@ -79,6 +79,27 @@ class Model_Covid_User extends CI_Model
     }
 
 
+    public function Check_user_member_type($result){
+        if(isset($result['user_ad_code'])){
+            $user_ad_code = $result['user_ad_code'];
+
+            $member_rule_result = $this->db
+                ->query("SELECT * FROM `cv_member_rule` WHERE user_ad_code ='$user_ad_code'")
+                ->result_array();
+            
+            if(sizeof($member_rule_result) != 0){
+                return array(  'status' => "true" , 'result' => array(array('member_type' => $member_rule_result[0]['member_type'])));
+            }else{
+                return array(  'status' => "true" , 'result' => array(array('member_type' => "user")));
+            }
+
+           
+      
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
+        }
+    }
+
     public function Get_List_Underline_by_user_ad_boss($result){
 
         if(isset($result['user_ad_code'])){
@@ -1421,7 +1442,7 @@ class Model_Covid_User extends CI_Model
                                 'detail' => "sdfgsdfgsdfgsdfgsdfgsdfg",
                 
                             );
-                            return $data;
+                            // return $data;
                             
                             // $ch = curl_init();
                             // curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
@@ -1462,7 +1483,7 @@ class Model_Covid_User extends CI_Model
             
                         );
 
-                        return $data;
+                        // return $data;
                         
             
                         
