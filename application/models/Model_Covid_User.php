@@ -92,7 +92,7 @@ class Model_Covid_User extends CI_Model
             if(sizeof($query)!= 0){
                 return  array(  'status' => "true" , 'result' => array('user_ad_code' => $user_ad_code , 'user_policy_status_approve_policy' => $query[0]['user_policy_status_approve_policy'] ) );
             }else{
-                return  array(  'status' => "true" , 'result' => array('user_ad_code' => $user_ad_code , 'user_policy_status_approve_policy' =>"0" ) );
+                return  array(  'status' => "true" , 'result' => array('user_ad_code' => $user_ad_code , 'user_policy_status_approve_policy' =>"" ) );
             }
 
         }else{
@@ -104,19 +104,25 @@ class Model_Covid_User extends CI_Model
         // INSERT INTO `cv_user_policy` (`user_ad_code`, `user_policy_status_approve_policy`, `user_policy_datetime`) VALUES ('003599', '0', '2021-01-13 10:38:35');
 
         if(isset($result['user_ad_code'])){
-            $user_ad_code = $result['user_ad_code'];
+            if(isset($result['user_policy_status_approve_policy'])){
+                $user_ad_code = $result['user_ad_code'];
+                $user_policy_status_approve_policy = $result['user_policy_status_approve_policy'];
 
-            $data = array(
-                'user_ad_code' => $user_ad_code, 
-                'user_policy_status_approve_policy' => "1",
-                'user_policy_datetime' => date("Y-m-d h:i:s"),
-            );
-        
-            $this->db->insert('cv_user_policy', $data);
-            if(($this->db->affected_rows() != 1) ? false : true){
-                return  array(  'status' => "true" , 'result' => "user approve polivy true" );
+
+                $data = array(
+                    'user_ad_code' => $user_ad_code, 
+                    'user_policy_status_approve_policy' => $user_policy_status_approve_policy,
+                    'user_policy_datetime' => date("Y-m-d h:i:s"),
+                );
+            
+                $this->db->insert('cv_user_policy', $data);
+                if(($this->db->affected_rows() != 1) ? false : true){
+                    return  array(  'status' => "true" , 'result' => "user approve polivy true" );
+                }else{
+                    return  array(  'status' => "false" , 'result' => "user approve polivy false" );
+                }
             }else{
-                return  array(  'status' => "false" , 'result' => "user approve polivy false" );
+                return  array(  'status' => "false" , 'result' => "request user_policy_status_approve_policy" );
             }
 
         }else{
@@ -263,33 +269,33 @@ class Model_Covid_User extends CI_Model
                                     if( isset( $result['self_assessment_HR3'] ) ){
                                         if( isset( $result['self_assessment_HR4'] ) ){
                                             if( isset( $result['self_assessment_LR'] ) ){
-                                                if( isset( $result['self_assessment_P'] ) ){
-                                                    if( isset( $result['self_assessment_HCW'] ) ){
-                                                        if( isset( $result['self_assessment_C'] ) ){
+                                                // if( isset( $result['self_assessment_P'] ) ){
+                                                    // if( isset( $result['self_assessment_HCW'] ) ){
+                                                        // if( isset( $result['self_assessment_C'] ) ){
                                                             if( isset( $result['self_assessment_result'] ) ){
-                                                                if( isset( $result['colorNormal'] ) ){    
-                                                                    if( isset( $result['self_assessment_result_specific'] ) ){
-                                                                        if( isset( $result['colorSpecific'] ) ){
+                                                                if( isset( $result['self_assessment_sum_color'] ) ){    
+                                                                    if( isset( $result['self_assessment_sum_result'] ) ){
+                                                                        // if( isset( $result['colorSpecific'] ) ){
                                                                             return array( 'status' => "true" , 'result' => "ok" );
-                                                                        }else{
-                                                                            return  array(  'status' => "false" , 'result' => "request colorSpecific" );
-                                                                        }
+                                                                        // }else{
+                                                                        //     return  array(  'status' => "false" , 'result' => "request colorSpecific" );
+                                                                        // }
                                                                     }else{
-                                                                        return  array(  'status' => "false" , 'result' => "request self_assessment_result_specific" );
+                                                                        return  array(  'status' => "false" , 'result' => "request self_assessment_sum_result" );
                                                                     }
-                                                                } return  array(  'status' => "false" , 'result' => "request colorNormal" );
+                                                                } return  array(  'status' => "false" , 'result' => "request self_assessment_sum_color" );
                                                             }else{
                                                                 return  array(  'status' => "false" , 'result' => "request self_assessment_result" );
                                                             }
-                                                        }else{
-                                                            return  array(  'status' => "false" , 'result' => "request self_assessment_C" );
-                                                        }
-                                                    }else{
-                                                        return  array(  'status' => "false" , 'result' => "request self_assessment_HCW" );
-                                                    }
-                                                }else{
-                                                    return  array(  'status' => "false" , 'result' => "request self_assessment_P" );
-                                                }
+                                                //         }else{
+                                                //             return  array(  'status' => "false" , 'result' => "request self_assessment_C" );
+                                                //         }
+                                                //     }else{
+                                                //         return  array(  'status' => "false" , 'result' => "request self_assessment_HCW" );
+                                                //     }
+                                                // }else{
+                                                //     return  array(  'status' => "false" , 'result' => "request self_assessment_P" );
+                                                // }
                                             }else{
                                                 return  array(  'status' => "false" , 'result' => "request self_assessment_LR" );
                                             }
@@ -325,18 +331,40 @@ class Model_Covid_User extends CI_Model
    
     public function Get_User_case($result,$self_assessment_result){
 
-        if($result['self_assessment_result_specific'] == "1"){
+        // if($result['self_assessment_result_specific'] == "1"){
+        //     $case = array( 
+        //         'self_assessment_sum_result' =>$self_assessment_result[0]['self_assessment_sum_result'],
+        //         'self_assessment_id' => $self_assessment_result[0]['self_assessment_id'],
+        //         'normal_case' => $this->db
+        //             ->where('self_assessment_criterion_id',$result["self_assessment_result"])
+        //             ->get('cv_self_assessment_criterion')
+        //             ->result_array() ,
+        //         'specific_case' => array('status_specific_case'=> "true" ,'result_specific_case' => $this->db
+        //             ->where('self_assessment_criterion_id',"12")
+        //             ->get('cv_self_assessment_criterion')
+        //             ->result_array()
+        //          ) 
+        //     );     
+        //     $status = array( 
+        //         'status' => "true" ,
+        //         'result' => $case
+        //     );
+    
+        //     return  $status;    
+        // }else{
             $case = array( 
                 'self_assessment_id' => $self_assessment_result[0]['self_assessment_id'],
+                'self_assessment_sum_result' => $self_assessment_result[0]['self_assessment_sum_result'],
+                'self_assessment_sum_color' => $self_assessment_result[0]['self_assessment_sum_color'],
+                'self_assessment_result' => $self_assessment_result[0]['self_assessment_result'],
                 'normal_case' => $this->db
                     ->where('self_assessment_criterion_id',$result["self_assessment_result"])
                     ->get('cv_self_assessment_criterion')
                     ->result_array() ,
-                'specific_case' => array('status_specific_case'=> "true" ,'result_specific_case' => $this->db
-                    ->where('self_assessment_criterion_id',"12")
-                    ->get('cv_self_assessment_criterion')
-                    ->result_array()
-                 ) 
+                // 'specific_case' =>  array('status_specific_case'=> "false" ,'result_specific_case' =>$this->db
+                // ->where('self_assessment_criterion_id',"11")
+                // ->get('cv_self_assessment_criterion')
+                // ->result_array())
             );     
             $status = array( 
                 'status' => "true" ,
@@ -344,25 +372,7 @@ class Model_Covid_User extends CI_Model
             );
     
             return  $status;    
-        }else{
-            $case = array( 
-                'self_assessment_id' => $self_assessment_result[0]['self_assessment_id'],
-                'normal_case' => $this->db
-                    ->where('self_assessment_criterion_id',$result["self_assessment_result"])
-                    ->get('cv_self_assessment_criterion')
-                    ->result_array() ,
-                'specific_case' =>  array('status_specific_case'=> "false" ,'result_specific_case' =>$this->db
-                ->where('self_assessment_criterion_id',"11")
-                ->get('cv_self_assessment_criterion')
-                ->result_array())
-            );     
-            $status = array( 
-                'status' => "true" ,
-                'result' => $case
-            );
-    
-            return  $status;    
-        }
+        // }
         
      
        
@@ -384,29 +394,40 @@ class Model_Covid_User extends CI_Model
             'self_assessment_HR3' =>  $result['self_assessment_HR3'],
             'self_assessment_HR4' =>  $result['self_assessment_HR4'], 
             'self_assessment_LR' =>  $result['self_assessment_LR'], 
-            'self_assessment_P' =>  $result['self_assessment_P'], 
-            'self_assessment_HCW' =>  $result['self_assessment_HCW'], 
-            'self_assessment_C' =>  $result['self_assessment_C'], 
+            // 'self_assessment_P' =>  $result['self_assessment_P'], 
+            // 'self_assessment_HCW' =>  $result['self_assessment_HCW'], 
+            // 'self_assessment_C' =>  $result['self_assessment_C'], 
+
+            'self_assessment_P' =>  "0", 
+            'self_assessment_HCW' =>  "0", 
+            'self_assessment_C' =>  "0", 
+            
             'self_assessment_result' =>  $result['self_assessment_result'], 
-            'self_assessment_colorNormal' => $result['colorNormal'], 
-            'self_assessment_result_specific' =>  $result['self_assessment_result_specific'], 
-            'self_assessment_colorSpecific' => $result['colorSpecific'], 
+            'self_assessment_colorNormal' => $result['self_assessment_sum_color'], 
+
+            // 'self_assessment_result_specific' =>  "", 
+            // 'self_assessment_colorSpecific' => "", 
+
             'self_assessment_date_time' =>  date("Y-m-d h:i:s"),
-            'chief_approve_result_check' => 0
+
+            "self_assessment_sum_result" => $result['self_assessment_sum_result'],
+            "self_assessment_sum_color" => $result['self_assessment_sum_color'],
+
         );
 
-        if($result['colorNormal'] == "danger" || $result['colorSpecific'] == "danger"){
-            $data['self_assessment_sum_result'] = "3" ;
-            $data['self_assessment_sum_color'] = "danger" ;
-            // alert to boss
-        }else if($result['colorNormal'] == "warning" || $result['colorSpecific'] == "warning"){
-            $data['self_assessment_sum_result'] = "2" ;
-            $data['self_assessment_sum_color'] = "warning" ;
-            // alert to boss
-        }else if ($result['colorNormal'] == "success" || $result['colorSpecific'] == "success"){
-            $data['self_assessment_sum_result'] = "1" ;
-            $data['self_assessment_sum_color'] = "success" ;
-        }
+        // if($result['colorNormal'] == "danger" || $result['colorSpecific'] == "danger"){
+        //     $data['self_assessment_sum_result'] = "3" ;
+        //     $data['self_assessment_sum_color'] = "danger" ;
+        //     // alert to boss
+        // }else if($result['colorNormal'] == "warning" || $result['colorSpecific'] == "warning"){
+        //     $data['self_assessment_sum_result'] = "2" ;
+        //     $data['self_assessment_sum_color'] = "warning" ;
+        //     // alert to boss
+        // }else if ($result['colorNormal'] == "success" || $result['colorSpecific'] == "success"){
+        //     $data['self_assessment_sum_result'] = "1" ;
+        //     $data['self_assessment_sum_color'] = "success" ;
+        // }
+
 
         $this->db->insert('cv_self_assessment', $data);
         if(($this->db->affected_rows() != 1) ? false : true){
@@ -574,15 +595,15 @@ class Model_Covid_User extends CI_Model
                             for($i=0; $i < sizeof($self_assessment_result); $i++){
         
                                 $self_assessment_result_Normal = $self_assessment_result[$i]["self_assessment_result"];
-                                $self_assessment_result_specific = $self_assessment_result[$i]["self_assessment_result_specific"];
+                                // $self_assessment_result_specific = $self_assessment_result[$i]["self_assessment_result_specific"];
                             
                                 $self_assessment_result[$i]['self_assessment_TextNormal'] = $this->db
                                 ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_Normal'")
                                 ->result_array();
                 
-                                $self_assessment_result[$i]['self_assessment_TextSpecific'] = $this->db
-                                ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                                ->result_array();
+                                // $self_assessment_result[$i]['self_assessment_TextSpecific'] = $this->db
+                                // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                                // ->result_array();
                             }
                 
                             
@@ -636,27 +657,32 @@ class Model_Covid_User extends CI_Model
         $data = array(
             'user_ad_code' => $user_ad_code, 
             'self_assessment_result' =>  $result['self_assessment_result'], 
-            'self_assessment_colorNormal' => $result['colorNormal'], 
-            'self_assessment_result_specific' =>  $result['self_assessment_result_specific'], 
-            'self_assessment_colorSpecific' => $result['colorSpecific']
+            'self_assessment_colorNormal' => $result['self_assessment_sum_color'], 
+            // 'self_assessment_result_specific' =>  $result['self_assessment_result_specific'], 
+            // 'self_assessment_colorSpecific' => $result['colorSpecific']
+
+            "self_assessment_sum_result" => $result['self_assessment_sum_result'],
+            "self_assessment_sum_color" => $result['self_assessment_sum_color'],
         );
 
       
 
         if($count == "0"){
 
-            if($result['colorNormal'] == "danger" || $result['colorSpecific'] == "danger"){
-                $data['self_assessment_sum_result'] = "3" ;
-                $data['self_assessment_sum_color'] = "danger" ;
-                // alert to boss
-            }else if($result['colorNormal'] == "warning" || $result['colorSpecific'] == "warning"){
-                $data['self_assessment_sum_result'] = "2" ;
-                $data['self_assessment_sum_color'] = "warning" ;
-                // alert to boss
-            }else if ($result['colorNormal'] == "success" || $result['colorSpecific'] == "success"){
-                $data['self_assessment_sum_result'] = "1" ;
-                $data['self_assessment_sum_color'] = "success" ;
-            }
+            // if($result['colorNormal'] == "danger" || $result['colorSpecific'] == "danger"){
+            //     $data['self_assessment_sum_result'] = "3" ;
+            //     $data['self_assessment_sum_color'] = "danger" ;
+            //     // alert to boss
+            // }else if($result['colorNormal'] == "warning" || $result['colorSpecific'] == "warning"){
+            //     $data['self_assessment_sum_result'] = "2" ;
+            //     $data['self_assessment_sum_color'] = "warning" ;
+            //     // alert to boss
+            // }else if ($result['colorNormal'] == "success" || $result['colorSpecific'] == "success"){
+            //     $data['self_assessment_sum_result'] = "1" ;
+            //     $data['self_assessment_sum_color'] = "success" ;
+            // }
+
+
             $data['chief_approve_result_check'] = "0";
             $data['chief_approve_id'] = "0";
     
@@ -679,16 +705,16 @@ class Model_Covid_User extends CI_Model
                 $data['chief_approve_id'] = "0";
             }
 
-            if($result['colorNormal'] == "danger" || $result['colorSpecific'] == "danger"){
-                $data['self_assessment_sum_result'] = "3" ;
-                $data['self_assessment_sum_color'] = "danger" ;
+            // if($result['colorNormal'] == "danger" || $result['colorSpecific'] == "danger"){
+            //     $data['self_assessment_sum_result'] = "3" ;
+            //     $data['self_assessment_sum_color'] = "danger" ;
                
-                 // alert to boss
-            }else if($result['colorNormal'] == "warning" || $result['colorSpecific'] == "warning"){
-                $data['self_assessment_sum_result'] = "2" ;
-                $data['self_assessment_sum_color'] = "warning" ;
-                // alert to boss
-            }
+            //      // alert to boss
+            // }else if($result['colorNormal'] == "warning" || $result['colorSpecific'] == "warning"){
+            //     $data['self_assessment_sum_result'] = "2" ;
+            //     $data['self_assessment_sum_color'] = "warning" ;
+            //     // alert to boss
+            // }
          
 
             $this->db->trans_begin();
@@ -778,15 +804,15 @@ class Model_Covid_User extends CI_Model
 
 
                     $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
-                    $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                    // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
                     
                     $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
                     ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                     ->result_array();
     
-                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
-                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                    ->result_array();
+                    // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                    // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                    // ->result_array();
 
 
 
@@ -1083,15 +1109,15 @@ class Model_Covid_User extends CI_Model
             for($i=0; $i < sizeof($query_detail); $i++){
 
                 $self_assessment_result = $query_detail[$i]["self_assessment_result"];
-                $self_assessment_result_specific = $query_detail[$i]["self_assessment_result_specific"];
+                // $self_assessment_result_specific = $query_detail[$i]["self_assessment_result_specific"];
                
                 $query_detail[$i]['self_assessment_TextNormal'] = $this->db
                 ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                 ->result_array();
 
-                $query_detail[$i]['self_assessment_TextSpecific'] = $this->db
-                ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                ->result_array();
+                // $query_detail[$i]['self_assessment_TextSpecific'] = $this->db
+                // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                // ->result_array();
             }
 
         
@@ -1137,15 +1163,15 @@ class Model_Covid_User extends CI_Model
             for($i=0; $i < sizeof($query_detail); $i++){
 
                 $self_assessment_result = $query_detail[$i]["self_assessment_result"];
-                $self_assessment_result_specific = $query_detail[$i]["self_assessment_result_specific"];
+                // $self_assessment_result_specific = $query_detail[$i]["self_assessment_result_specific"];
                 
                 $query_detail[$i]['self_assessment_TextNormal'] = $this->db
                 ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                 ->result_array();
 
-                $query_detail[$i]['self_assessment_TextSpecific'] = $this->db
-                ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                ->result_array();
+                // $query_detail[$i]['self_assessment_TextSpecific'] = $this->db
+                // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                // ->result_array();
 
                 $nurse_comment_id = $query_detail[$i]['nurse_comment_id'];
                         
@@ -1244,15 +1270,15 @@ class Model_Covid_User extends CI_Model
                 for($i=0; $i < sizeof($self_assessment_result); $i++){
     
                     $self_assessment_result_normal = $self_assessment_result[$i]["self_assessment_result"];
-                    $self_assessment_result_specific = $self_assessment_result[$i]["self_assessment_result_specific"];
+                    // $self_assessment_result_specific = $self_assessment_result[$i]["self_assessment_result_specific"];
                    
                     $self_assessment_result[$i]['self_assessment_TextNormal'] = $this->db
                     ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_normal'")
                     ->result_array();
     
-                    $self_assessment_result[$i]['self_assessment_TextSpecific'] = $this->db
-                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                    ->result_array();
+                    // $self_assessment_result[$i]['self_assessment_TextSpecific'] = $this->db
+                    // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                    // ->result_array();
                 }
     
                 $result_boss = array(json_decode($this->Get_id_chief_by_dapt_code($user_ad_code), true));
@@ -1440,7 +1466,7 @@ class Model_Covid_User extends CI_Model
 
         if(sizeof($detail_user) != 0){
             
-            if($detail_user[0]['self_assessment_sum_result'] == "2" || $detail_user[0]['self_assessment_sum_result'] == "3"){ 
+            if($detail_user[0]['self_assessment_sum_result'] == "3" || $detail_user[0]['self_assessment_sum_result'] == "4" || $detail_user[0]['self_assessment_sum_result'] == "5" ){ 
                 
             
                 if(sizeof($chief_result) != 0){

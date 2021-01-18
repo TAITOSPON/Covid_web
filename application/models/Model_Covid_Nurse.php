@@ -129,15 +129,15 @@ class Model_Covid_Nurse extends CI_Model
 
                          
                             $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
-                            $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                            // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
                             
                             $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
                             ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                             ->result_array();
             
-                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
-                            ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                            ->result_array();
+                            // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                            // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                            // ->result_array();
                          
                          
                             $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
@@ -228,15 +228,15 @@ class Model_Covid_Nurse extends CI_Model
 
 
                         $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
-                        $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                        // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
                         
                         $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
                         ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                         ->result_array();
         
-                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
-                        ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                        ->result_array();
+                        // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                        // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                        // ->result_array();
 
                         
                         $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
@@ -305,11 +305,19 @@ class Model_Covid_Nurse extends CI_Model
             if(isset($result['user_ad_code'])){
                 if(isset($result['nurse_comment_text'])){
                     if(isset($result['self_assessment_id'])){
+                        if(isset($result['nurse_approve_status_wfh'])){
+                            if(isset($result['nurse_approve_wfh_date_start'])){
+                                if(isset($result['nurse_approve_wfh_date_end'])){
+
 
                         $nurse_comment_ad_id    = $result['nurse_comment_ad_id'];
                         $user_ad_code           = $result['user_ad_code'];
                         $nurse_comment_text     = $result['nurse_comment_text'];
                         $self_assessment_id     = $result['self_assessment_id'];
+
+                        $nurse_approve_status_wfh = $result['nurse_approve_status_wfh'];
+                        $nurse_approve_wfh_date_start = $result['nurse_approve_wfh_date_start'];
+                        $nurse_approve_wfh_date_end = $result['nurse_approve_wfh_date_end'];
                         // INSERT INTO `cv_nurse_comment` (`nurse_comment_id`, `nurse_comment_ad_id`, `nurse_comment_date_time`, `nurse_comment_text`, `user_ad_code`) VALUES (NULL, '003599', current_timestamp(), 'fghsfghsfghxfgh', '003599');
 
                         $data = array(
@@ -317,6 +325,9 @@ class Model_Covid_Nurse extends CI_Model
                             'nurse_comment_ad_id' => $nurse_comment_ad_id,
                             'nurse_comment_date_time' => date("Y-m-d h:i:s"),
                             'nurse_comment_text' =>  $nurse_comment_text,
+                            'nurse_approve_status_wfh' => $nurse_approve_status_wfh,
+                            'nurse_approve_wfh_date_start' => $nurse_approve_wfh_date_start,
+                            'nurse_approve_wfh_date_end' => $nurse_approve_wfh_date_end,
                             'user_ad_code' => $user_ad_code
                           
                         );
@@ -346,6 +357,17 @@ class Model_Covid_Nurse extends CI_Model
                         }
 
 
+
+
+                                }else{
+                                    return array(  'status' => "false" , 'result' => "request nurse_approve_wfh_date_end");
+                                }
+                            }else{
+                                return array(  'status' => "false" , 'result' => "request nurse_approve_wfh_date_start");
+                            }
+                        }else{
+                            return array(  'status' => "false" , 'result' => "request nurse_approve_status_wfh");
+                        }
                     }else{
                         return array(  'status' => "false" , 'result' => "request self_assessment_id");
                     }
