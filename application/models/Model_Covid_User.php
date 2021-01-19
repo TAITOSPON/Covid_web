@@ -496,9 +496,45 @@ class Model_Covid_User extends CI_Model
                             return  array(  'status' => "false" , 'result' => "trans_rollback" );
                         } else {
                             $this->db->trans_commit();
-            
-                            return  array(  'status' => "true" , 'result' => "Update Form 2 True" );
-                        
+                           
+                            $self_assessment_result = $this->db->query("SELECT * FROM `cv_self_assessment`  WHERE self_assessment_id = '$self_assessment_id'")->result_array();
+
+                            $form = "2";
+                            $this->Alert_to_Chief($form,$user_ad_code,$self_assessment_result);
+
+                            
+                            $self_assessment_detail_result = array(json_decode($result_self_assessment_detail[0]['self_assessment_detail_result'], true));
+
+                            $self_assessment_detail_sum_result = $self_assessment_detail_result[0]['self_assessment_detail_sum_result'];
+
+                            $self_assessment_detail_criterion = $this->db->query("SELECT * FROM `cv_self_assessment_detail_criterion` WHERE self_assessment_detail_criterion_id = '$self_assessment_detail_sum_result'")->result_array();
+
+                            $data = array(
+                                'self_assessment_detail_sum_result' => $self_assessment_detail_result[0]['self_assessment_detail_sum_result'],
+                                'self_assessment_detail_sum_color' => $self_assessment_detail_result[0]['self_assessment_detail_sum_color'],
+                                'self_assessment_detail_criterion' => $self_assessment_detail_criterion
+                            );
+
+                            // $data = array();
+                    
+                            // $data['self_assessment_detail_sum_result'] = "0";
+                            // $data['self_assessment_detail_sum_color'] = "success";
+                            // $data['1_'] = array('status' => "1");
+                            // $data['2_s'] = array( 'status'=>"1");
+                            // $data['3_n'] = array('status' => "1");
+                            // $data['4_'] = array('status' => "1");
+                            // $data['5_'] = array('status' => "1");
+                            
+                            // $result = array(
+                            //     'user_ad_code' => "003599",
+                            //     'self_assessment_id' => "503",
+                            //     'self_assessment_detail_result' => $data
+                            // );
+                            // return $result;
+             
+                         
+                            return  array(  'status' => "true" , 'result' => $data );
+
                         }
 
                     }
@@ -514,55 +550,67 @@ class Model_Covid_User extends CI_Model
         }else{
             return  array(  'status' => "false" , 'result' => "request user_ad_code" );
         }
+      
+    }
 
 
-        // $data = array();
-        // $data['1_Have_Fever'] = array('status' => "1");
+    public function Set_self_assessment_timeline($result){
+        if(isset($result['user_ad_code'])){
+            if(isset($result['assessment_timeline_datetime_input'])){
+                if(isset($result['assessment_timeline_result'])){
 
-        // $data['2_Have_symptoms'] = array(  'status'=>"1",'detail'=>"textdetaillll");
-        // $data['3_Physician'] = array('status' => "1");
-        // $data['4_Close_up_people_risk'] = array('status' => "1");
-        // $data['5_Close_up_people_colds'] = array('status' => "1");
-        // $data['6_Close_up_people_covid'] = array('status' => "1");
-
-        // $data['7_Transport'] =  array(
-        //     'status_one' => "1",
-        //     'status_two' => "1",
-        //     'status_detail' => array('status'=>"1",'detail'=>"textdetaillll"),
-        // );
-        // $data['8_Protect'] = array(
-        //     'status_one' => "1",
-        //     'status_two' => "1",      
-        // );
-
-        // $data['9_Protect'] = array( 'status' => "1", );
-
-        // $data['10_Activity_risk'] = array(
-        //     'status_one' => "1",
-        //     'status_two' => "1",
-        //     'status_three' => "1",
-        //     'status_four' => "1",
-        //     'status_detail' => array('status'=>"1",'detail'=>"textdetaillll"),
-        // );
-        
-
-        // $data['11_Time_line'] = array(
-        //     'status_one' => "1",
-        //     'status_two' => "1",
-        //     'status_three' => "1",
-           
-        // );
-
-        // $result = array(
-        //     'user_ad_code' => "003599",
-        //     'self_assessment_id' => "264",
-        //     'self_assessment_detail_result' => $data
-
-        // );
-
-        // return $result;
+            // INSERT INTO `cv_self_assessment_timeline` (`self_assessment_timeline_id`, `user_ad_code`, `assessment_timeline_datetime_input`, `assessment_timeline_result`, `assessment_timeline_datetime_create`)
+            //  VALUES (NULL, '003599', '2021-01-19 14:38:16', 'dsghj', '2021-01-19 14:38:16');
 
 
+                    // $data = array();
+
+                    // $data['body_temp'] = array('value' => "35.5");
+                    // $data['symptom'] = array(
+                    //     'status_1'=> "1",
+                    //     'status_2'=> "1",
+                    //     'status_3'=> "1",
+                    //     'status_4'=> "1",
+                    //     'status_5'=> "1"
+                    // );
+
+                    // $data['note'] = array('value' => "dsfghsfghsfghsfghsfghsfghsfghgf");
+                
+                    // $result = array(
+                    //     'user_ad_code' => "003599",
+                    //     'assessment_timeline_datetime_input' => date("Y-m-d h:i:s"),
+                    //     'assessment_timeline_result' => $data
+                    // );
+                    // return $result;
+
+
+                    $user_ad_code = $result['user_ad_code'];
+ 
+
+                    $data = array(
+                        'self_assessment_timeline_id' => NULL,
+                        'user_ad_code' => $user_ad_code,
+                        'assessment_timeline_datetime_input' => $result['assessment_timeline_datetime_input'],
+                        'assessment_timeline_result' =>json_encode($result['assessment_timeline_result']),
+                        'assessment_timeline_datetime_create' => date("Y-m-d h:i:s")
+                    );
+
+                    $this->db->insert('cv_self_assessment_timeline', $data);
+                    if(($this->db->affected_rows() != 1) ? false : true){
+                        return  array(  'status' => "true" , 'result' => "insert cv_self_assessment_timeline true" );
+                    }
+
+                }else{
+                    return  array(  'status' => "false" , 'result' => "request assessment_timeline_result" ); 
+                }
+            }else{
+                return  array(  'status' => "false" , 'result' => "request assessment_timeline_datetime_input" );
+            }
+
+
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
+        }
 
     }
 
@@ -588,42 +636,123 @@ class Model_Covid_User extends CI_Model
 
                 if(sizeof($latest_status_result) != 0){
             
-        
-                    if($latest_status_result[0]['self_assessment_sum_result'] == "2" || $latest_status_result[0]['self_assessment_sum_result'] == "3"){
-                        if($latest_status_result[0]['chief_approve_result_check'] == "0" || $latest_status_result[0]['chief_approve_result_check'] == "2"){
-        
-                            for($i=0; $i < sizeof($self_assessment_result); $i++){
-        
-                                $self_assessment_result_Normal = $self_assessment_result[$i]["self_assessment_result"];
-                                // $self_assessment_result_specific = $self_assessment_result[$i]["self_assessment_result_specific"];
-                            
-                                $self_assessment_result[$i]['self_assessment_TextNormal'] = $this->db
-                                ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_Normal'")
-                                ->result_array();
-                
-                                // $self_assessment_result[$i]['self_assessment_TextSpecific'] = $this->db
-                                // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                                // ->result_array();
+                    
+                    $self_assessment_id = $self_assessment_result[0]['self_assessment_id'];
+
+                    $self_assessment_detail_result = $this->db
+                    ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id' AND user_ad_code = '$user_ad_code'
+                    ORDER BY `cv_self_assessment_detail`.`self_assessment_detail_id` DESC LIMIT 1")
+                    ->result_array();
+ 
+                    // print_r($self_assessment_detail_result); exit();
+
+                    if(sizeof($self_assessment_detail_result) != 0){
+
+                            // $self_assessment_detail_sum_result = $self_assessment_detail_result
+                            // return $self_assessment_detail_result[0]['self_assessment_detail_result'];
+                            $self_assessment_detail_result = array(json_decode($self_assessment_detail_result[0]['self_assessment_detail_result'], true));
+
+                            if($self_assessment_detail_result[0]['self_assessment_detail_sum_result'] == "1"){
+                               
+                                return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => "work from 3"  ));
+
+                            }else{
+                                return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                             }
+
+
+                    }else{
+
+                        // print_r($latest_status_result); exit();
+                        if($latest_status_result[0]['self_assessment_sum_result'] == "5"){
+
+                            if($latest_status_result[0]['chief_approve_result_check'] != "1" ){
+
+                                if($latest_status_result[0]['doctor_approve_status_wfh'] == "0" ){
+
+                                    return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => "work from 3"  ));
+
+                                }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "1"){
+
+                                    $nurse_comment_id = $self_assessment_result[0]['nurse_comment_id'];
+
+                                    $nurse_comment_result = $this->db
+                                    ->query("SELECT * FROM `cv_nurse_comment`WHERE nurse_comment_id = '$nurse_comment_result'")
+                                    ->result_array();
+                                   
+                                    if(sizeof($nurse_comment_result) != 0){
+
+                                        $nurse_approve_wfh_date_end = $nurse_comment_result[0]['nurse_approve_wfh_date_end'];
+                                        $datenow = date("Y-m-d h:i:s");
+
+                                        if($nurse_approve_wfh_date_end < $datenow){
+                                            return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => "work from 3"  ));
+                                        }else{
+                                            return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                        }
+
+                                    }else{
+                                        return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                    }
+
+                               
+
+                                }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "2"){
+                                    return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                }
+
+
+                               
+
+
+                            }else{
+                                return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                            }
+
+                       
+                        }else{
+                            return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                        }
+                    
+                    }
+
+                                          
+
+                    // if($latest_status_result[0]['self_assessment_sum_result'] == "2" || $latest_status_result[0]['self_assessment_sum_result'] == "3"){
+                    //     if($latest_status_result[0]['chief_approve_result_check'] == "0" || $latest_status_result[0]['chief_approve_result_check'] == "2"){
+        
+                    //         for($i=0; $i < sizeof($self_assessment_result); $i++){
+        
+                    //             $self_assessment_result_Normal = $self_assessment_result[$i]["self_assessment_result"];
+                    //             // $self_assessment_result_specific = $self_assessment_result[$i]["self_assessment_result_specific"];
+                            
+                    //             $self_assessment_result[$i]['self_assessment_TextNormal'] = $this->db
+                    //             ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_Normal'")
+                    //             ->result_array();
+                
+                    //             // $self_assessment_result[$i]['self_assessment_TextSpecific'] = $this->db
+                    //             // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                    //             // ->result_array();
+                    //         }
                 
                             
-                            // work from 2 only
-                            return  array(  'status' => "true" , 'result' =>
-                            array(
-                                'status'=>"false" , 
-                                'self_assessment_id' => $self_assessment_result[0]['self_assessment_id'],
-                                "self_assessment_result" => $self_assessment_result,
-                                ));
+                    //         // work from 2 only
+                    //         return  array(  'status' => "true" , 'result' =>
+                    //         array(
+                    //             'status'=>"false" , 
+                    //             'self_assessment_id' => $self_assessment_result[0]['self_assessment_id'],
+                    //             "self_assessment_result" => $self_assessment_result,
+                    //             ));
         
                                 
         
         
-                        }else{
-                                return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
-                        }
-                    }else{
-                        return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
-                    }
+                    //     }else{
+                    //             return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                    //     }
+                    // }else{
+                    //     return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                    // }
 
                 }else{
                     return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
@@ -642,8 +771,7 @@ class Model_Covid_User extends CI_Model
        
     }
 
-
-
+   
 
     public function Update_User_latest_status($result,$self_assessment_result){
 
@@ -661,8 +789,8 @@ class Model_Covid_User extends CI_Model
             // 'self_assessment_result_specific' =>  $result['self_assessment_result_specific'], 
             // 'self_assessment_colorSpecific' => $result['colorSpecific']
 
-            "self_assessment_sum_result" => $result['self_assessment_sum_result'],
-            "self_assessment_sum_color" => $result['self_assessment_sum_color'],
+            // "self_assessment_sum_result" => $result['self_assessment_sum_result'],
+            // "self_assessment_sum_color" => $result['self_assessment_sum_color'],
         );
 
       
@@ -681,7 +809,8 @@ class Model_Covid_User extends CI_Model
             //     $data['self_assessment_sum_result'] = "1" ;
             //     $data['self_assessment_sum_color'] = "success" ;
             // }
-
+            $data['self_assessment_sum_result'] = $result['self_assessment_sum_result'] ;
+            $data['self_assessment_sum_color'] = $result['self_assessment_sum_color'];
 
             $data['chief_approve_result_check'] = "0";
             $data['chief_approve_id'] = "0";
@@ -689,7 +818,8 @@ class Model_Covid_User extends CI_Model
             $this->db->insert('cv_user_latest_status', $data);
             if(($this->db->affected_rows() != 1) ? false : true){
 
-                $this->Alert_to_Chief($user_ad_code,$self_assessment_result);
+                $form = "1";
+                $this->Alert_to_Chief($form,$user_ad_code,$self_assessment_result);
 
             }
 
@@ -715,7 +845,12 @@ class Model_Covid_User extends CI_Model
             //     $data['self_assessment_sum_color'] = "warning" ;
             //     // alert to boss
             // }
-         
+            if($result['self_assessment_sum_result'] != "1"){
+                $data['self_assessment_sum_result'] = $result['self_assessment_sum_result'] ;
+                $data['self_assessment_sum_color'] = $result['self_assessment_sum_color'];
+            }
+
+
 
             $this->db->trans_begin();
             $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user_latest_status');
@@ -726,7 +861,8 @@ class Model_Covid_User extends CI_Model
             } else {
                 $this->db->trans_commit();
 
-                $this->Alert_to_Chief($user_ad_code,$self_assessment_result);
+                $form = "1";
+                $this->Alert_to_Chief($form,$user_ad_code,$self_assessment_result);
             }
         }
 
@@ -1454,7 +1590,7 @@ class Model_Covid_User extends CI_Model
 
 
 
-    public function Alert_to_Chief($user_ad_code,$self_assessment_result){
+    public function Alert_to_Chief($form,$user_ad_code,$self_assessment_result){
   
         $detail_user = $this->db
         ->query("SELECT * FROM `cv_user_latest_status`
@@ -1466,117 +1602,117 @@ class Model_Covid_User extends CI_Model
 
         if(sizeof($detail_user) != 0){
             
-            if($detail_user[0]['self_assessment_sum_result'] == "3" || $detail_user[0]['self_assessment_sum_result'] == "4" || $detail_user[0]['self_assessment_sum_result'] == "5" ){ 
-                
-            
-                if(sizeof($chief_result) != 0){
-
-                    $user_ad_name = $detail_user[0]['user_ad_name'];
-                    $user_ad_tel = $detail_user[0]['user_ad_tel'];
-                    $user_ad_dept_name = $detail_user[0]['user_ad_dept_name'];
-                    $self_assessment_id = $self_assessment_result[0]['self_assessment_id'];
-                    // $self_assessment_id = "264";
-      
-                    $liff = "line://app/1655109480-2XKglnaX?liff.state=";
-                    $path = "Covid19_boss/".$self_assessment_id;
-                    $url = $liff.urlencode($path);
-
-                    //ALERT TO NURSE ============================================================================
-                    $text_nurse = "แจ้งเตือน คุณพยาบาลและคณะ".
-                    "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
-                    "\n".$user_ad_dept_name.
-                    "\nโทร. ".$user_ad_tel.
-                    "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
-
-                    $this->Alert_to_Nurse($text_nurse);
-    
-                    if( $user_ad_code == $chief_result[0]['PN_NO'] ){
-    
-                        // user is Director
-                        $boss_result = $this->Get_Boss_by_ad_Director($user_ad_code);
-                
-                        if(sizeof($boss_result) != 0){
-
-                            // $user_ad_id_recrive = "003599";
-                            $user_ad_id_recrive = $boss_result[0]['member_ad_boss'];
-                            $user_ad_id_recrive_name =  $chief_result[0]['member_name_boss'];
-                           
-                            
-                            $text = "แจ้งเตือน ".$user_ad_id_recrive_name.
-                            "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
-                            "\n".$user_ad_dept_name.
-                            "\nโทร. ".$user_ad_tel.
-                            "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจาก\n".$url."\n\nหรือจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
-
-                            $data = array(
-                                'header' => array(array("User-Agent" => "back_end_Covid")),
-                                'body' => array(array("user_ad_id_recrive" => $user_ad_id_recrive , 'text' => $text )),
-                                'detail' => "sdfgsdfgsdfgsdfgsdfgsdfg",
-                
-                            );
-                            // return $data;
-                            
-                            $ch = curl_init();
-                            curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
-                            curl_setopt($ch, CURLOPT_POST, true);
-                            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
-                            $result = curl_exec($ch);
-                            curl_close($ch);
-                            // return  $result;
-
-
-               
-                          
-                        }
-    
-                    }else{
-
-                        // $user_ad_id_recrive = "003599";
-                        $user_ad_id_recrive = $chief_result[0]['PN_NO'];
-                        $user_ad_id_recrive_name =  $chief_result[0]['FULL_NAME'];
-                        $user_ad_id_recrive_dept_name = $chief_result[0]['DEPT_NAME'];
-
-                    
-                        $text = "แจ้งเตือน ".$user_ad_id_recrive_name.
-                        "\n".$user_ad_id_recrive_dept_name.
-                        "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
-                        "\n".$user_ad_dept_name.
-                        "\nโทร. ".$user_ad_tel.
-                        "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจาก\n".$url."\n\nหรือจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
-
-
-                        $data = array(
-                            'header' => array(array("User-Agent" => "back_end_Covid")),
-                            'body' => array(array("user_ad_id_recrive" => $user_ad_id_recrive , 'text' => $text )),
-                            'detail' => "alert",
-            
-                        );
-
-                        // return $data;
-                        
-            
-                        
-                        $ch = curl_init();
-                        curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
-                        curl_setopt($ch, CURLOPT_POST, true);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
-                        $result = curl_exec($ch);
-                        curl_close($ch);
-                        // return  $result;
-                
-                      
-                    }         
+            if($form == "1"){
+                if($self_assessment_result[0]['self_assessment_sum_result'] == "5" ){ 
+                    $this->Alert_text($detail_user,$chief_result,$user_ad_code,$self_assessment_result);  
                 }
-    
+            }else{
+                $this->Alert_text($detail_user,$chief_result,$user_ad_code,$self_assessment_result);  
             }
         }
 
+    }
+
+    public function Alert_text($detail_user,$chief_result,$user_ad_code,$self_assessment_result){
+
+        if(sizeof($chief_result) != 0){
+                    
+            $user_ad_name = $detail_user[0]['user_ad_name'];
+            $user_ad_tel = $detail_user[0]['user_ad_tel'];
+            $user_ad_dept_name = $detail_user[0]['user_ad_dept_name'];
+            $self_assessment_id = $self_assessment_result[0]['self_assessment_id'];
+            // $self_assessment_id = "264";
+
+            $liff = "line://app/1655109480-2XKglnaX?liff.state=";
+            $path = "Covid19_boss/".$self_assessment_id;
+            $url = $liff.urlencode($path);
+
+            //ALERT TO NURSE ============================================================================
+            $text_nurse = "แจ้งเตือน คุณพยาบาลและคณะ".
+            "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+            "\n".$user_ad_dept_name.
+            "\nโทร. ".$user_ad_tel.
+            "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
+
+            $this->Alert_to_Nurse($text_nurse);
+
+            if( $user_ad_code == $chief_result[0]['PN_NO'] ){
+
+                // user is Director
+                $boss_result = $this->Get_Boss_by_ad_Director($user_ad_code);
+        
+                if(sizeof($boss_result) != 0){
+
+                    // $user_ad_id_recrive = "003599";
+                    $user_ad_id_recrive = $boss_result[0]['member_ad_boss'];
+                    $user_ad_id_recrive_name =  $chief_result[0]['member_name_boss'];
+                   
+                    
+                    $text = "แจ้งเตือน ".$user_ad_id_recrive_name.
+                    "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+                    "\n".$user_ad_dept_name.
+                    "\nโทร. ".$user_ad_tel.
+                    "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจาก\n".$url."\n\nหรือจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
+
+                    $data = array(
+                        'header' => array(array("User-Agent" => "back_end_Covid")),
+                        'body' => array(array("user_ad_id_recrive" => $user_ad_id_recrive , 'text' => $text )),
+                        'detail' => "sdfgsdfgsdfgsdfgsdfgsdfg",
+        
+                    );
+
+                    
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
+                    $result = curl_exec($ch);
+                    curl_close($ch);
+                    // return  $result;
+
+                }
+
+            }else{
+
+                // $user_ad_id_recrive = "003599";
+                $user_ad_id_recrive = $chief_result[0]['PN_NO'];
+                $user_ad_id_recrive_name =  $chief_result[0]['FULL_NAME'];
+                $user_ad_id_recrive_dept_name = $chief_result[0]['DEPT_NAME'];
+
+            
+                $text = "แจ้งเตือน ".$user_ad_id_recrive_name.
+                "\n".$user_ad_id_recrive_dept_name.
+                "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+                "\n".$user_ad_dept_name.
+                "\nโทร. ".$user_ad_tel.
+                "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจาก\n".$url."\n\nหรือจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
+
+
+                $data = array(
+                    'header' => array(array("User-Agent" => "back_end_Covid")),
+                    'body' => array(array("user_ad_id_recrive" => $user_ad_id_recrive , 'text' => $text )),
+                    'detail' => "alert",
+    
+                );
+ 
+                
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_LineMessage/Send_Line_Message');
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data  ));
+                $result = curl_exec($ch);
+                curl_close($ch);
+                // return  $result;
+        
+              
+            }         
+        }
     }
 
 

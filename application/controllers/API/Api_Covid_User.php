@@ -56,6 +56,13 @@ class Api_Covid_User extends REST_Controller{
    
        }
 
+       public function User_Set_self_assessment_timeline_post(){
+              
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->Set_self_assessment_timeline($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
+
        public function Check_self_assessment_latest_with_ad_code_post(){
               $data = json_decode(file_get_contents('php://input'), true);
               $result = $this->Model_Covid_User->Check_self_assessment_latest_with_ad_code($data);  
@@ -98,7 +105,7 @@ class Api_Covid_User extends REST_Controller{
        // FOR USER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-
+ 
 
 
        // FOR Chief +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

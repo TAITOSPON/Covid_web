@@ -124,8 +124,8 @@ class Model_Covid_Doctor extends CI_Model
                         $user_self_assessment_result = $this->db  
                         ->query("SELECT * FROM `cv_self_assessment`
                             WHERE `user_ad_code` =  '$user_ad_code'
-                            AND `chief_approve_result_check` = 2
-                            AND `nurse_comment_id` != 0 
+                            -- AND `chief_approve_result_check` = 2
+                            -- AND `nurse_comment_id` != 0 
                             ORDER BY `self_assessment_id` DESC LIMIT 100")
                         ->result_array();
 
@@ -225,8 +225,8 @@ class Model_Covid_Doctor extends CI_Model
                     $user_self_assessment_result = $this->db  
                     ->query("SELECT * FROM `cv_self_assessment`
                         WHERE `user_ad_code` =  '$user_ad_code'
-                        AND `chief_approve_result_check` = 2
-                        AND `nurse_comment_id` != 0 
+                        -- AND `chief_approve_result_check` = 2
+                        -- AND `nurse_comment_id` != 0 
                         ORDER BY `self_assessment_id` DESC LIMIT 100")
                     ->result_array();
 
