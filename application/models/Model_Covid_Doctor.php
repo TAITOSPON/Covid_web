@@ -111,8 +111,8 @@ class Model_Covid_Doctor extends CI_Model
                     $user_result = $this->db
                         ->query("SELECT * FROM `cv_user_latest_status`
                             INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
-                            WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
-                            AND `cv_user_latest_status`.chief_approve_result_check = 2")
+                            WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'")
+                            // AND `cv_user_latest_status`.chief_approve_result_check = 2")
                         ->result_array();
                             // print_r($this->db->last_query());  exit();
                     // print_r($); exit();
@@ -125,7 +125,7 @@ class Model_Covid_Doctor extends CI_Model
                         ->query("SELECT * FROM `cv_self_assessment`
                             WHERE `user_ad_code` =  '$user_ad_code'
                             -- AND `chief_approve_result_check` = 2
-                            -- AND `nurse_comment_id` != 0 
+                            AND `nurse_comment_id` != 0 
                             ORDER BY `self_assessment_id` DESC LIMIT 100")
                         ->result_array();
 
@@ -137,15 +137,30 @@ class Model_Covid_Doctor extends CI_Model
 
 
                             $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
-                            $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                            // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
                             
                             $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
-                            ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                            ->query("SELECT *  FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                             ->result_array();
             
-                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
-                            ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                            // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                            // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                            // ->result_array();
+
+                            $self_assessment_id  = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_id"];
+
+                            $self_assessment_detail =  $this->db
+                            ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id'")
                             ->result_array();
+
+                            if(sizeof($self_assessment_detail) != 0){
+
+                                $self_assessment_detail_result = array(json_decode($self_assessment_detail[0]['self_assessment_detail_result'], true)); 
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = $self_assessment_detail_result;
+
+                            }else{
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = array();
+                            }
 
                             $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
                         
@@ -213,8 +228,8 @@ class Model_Covid_Doctor extends CI_Model
                 $user_result = $this->db
                 ->query("SELECT * FROM `cv_user_latest_status`
                     INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
-                    WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
-                    AND `cv_user_latest_status`.chief_approve_result_check = 2")
+                    WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'")
+                    // AND `cv_user_latest_status`.chief_approve_result_check = 2")
                 ->result_array();
 
                 for($index_user_result=0; $index_user_result < sizeof($user_result); $index_user_result++){
@@ -226,7 +241,7 @@ class Model_Covid_Doctor extends CI_Model
                     ->query("SELECT * FROM `cv_self_assessment`
                         WHERE `user_ad_code` =  '$user_ad_code'
                         -- AND `chief_approve_result_check` = 2
-                        -- AND `nurse_comment_id` != 0 
+                        AND `nurse_comment_id` != 0 
                         ORDER BY `self_assessment_id` DESC LIMIT 100")
                     ->result_array();
 
@@ -240,12 +255,27 @@ class Model_Covid_Doctor extends CI_Model
                         // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
                         
                         $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
-                        ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                        ->query("SELECT *  FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                         ->result_array();
         
                         // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
                         // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
                         // ->result_array();
+
+                        $self_assessment_id  = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_id"];
+
+                        $self_assessment_detail =  $this->db
+                        ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id'")
+                        ->result_array();
+
+                        if(sizeof($self_assessment_detail) != 0){
+
+                            $self_assessment_detail_result = array(json_decode($self_assessment_detail[0]['self_assessment_detail_result'], true)); 
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = $self_assessment_detail_result;
+
+                        }else{
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = array();
+                        }
 
                         $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
                     
@@ -331,12 +361,12 @@ class Model_Covid_Doctor extends CI_Model
                     $self_assessment_result_specific = $result_self_assessment[$i]["self_assessment_result_specific"];
                     
                     $result_self_assessment[$i]['self_assessment_TextNormal'] = $this->db
-                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                    ->query("SELECT * FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                     ->result_array();
     
-                    $result_self_assessment[$i]['self_assessment_TextSpecific'] = $this->db
-                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                    ->result_array();
+                    // $result_self_assessment[$i]['self_assessment_TextSpecific'] = $this->db
+                    // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                    // ->result_array();
                 }
                 
                 $nurse_comment_id = $result_self_assessment[0]['nurse_comment_id'];
@@ -523,19 +553,43 @@ class Model_Covid_Doctor extends CI_Model
 
         if(isset($result['doctor_approve_by_id'])){
 
-            if(isset($result['user_ad_code'])){
+            if(isset($result['doctor_approve_detail'])){
+                        
+                if(isset($result['self_assessment_id'])){
 
-                if(isset($result['doctor_approve_detail'])){
-                                
-                    if(isset($result['self_assessment_id'])){
+                        // return $result['self_assessment_id'][1];
+                        // return array(
+                        //     'doctor_approve_by_id' => "003599",                
+                        //     'doctor_approve_detail' => "text detail",
+                        //     'self_assessment_id' => array('517','518','519')
+                        // );
+
+                        
+                        // return sizeof($result['self_assessment_id']);
+                        if( sizeof($result['self_assessment_id']) != 0){
 
 
+                   
+
+                            for($i=0; $i < sizeof($result['self_assessment_id']); $i++){
+                                // print_r($i);
+
+                               
+                                    $self_assessment_id = $result['self_assessment_id'][$i];
+
+                                    $doctor_approve_result = $this->db
+                                        ->query("SELECT * FROM `cv_self_assessment` WHERE self_assessment_id = '$self_assessment_id'")
+                                        ->result_array();
+                                   
+
+                                    $user_ad_code =  $doctor_approve_result[0]['user_ad_code'];
+                                   
                                     $doctor_approve_by_id = $result['doctor_approve_by_id'];
-                                    $user_ad_code = $result['user_ad_code'];
                                     $doctor_approve_detail = $result['doctor_approve_detail'];
-                                    $self_assessment_id = $result['self_assessment_id'];
-            
-            
+
+
+
+
                                     $data = array(
                                         'doctor_approve_id' => NULL,
                                         'user_ad_code' => $user_ad_code,
@@ -553,12 +607,13 @@ class Model_Covid_Doctor extends CI_Model
                                         ->query("SELECT * FROM `cv_doctor_approve` WHERE `user_ad_code` = '$user_ad_code' ORDER BY `doctor_approve_id` DESC LIMIT 1")
                                         ->result_array();
 
-
+                                        // print_r( $doctor_approve_result);
+                                        
                                         $self_assessment_result = $this->db
                                         ->query(" SELECT * FROM `cv_self_assessment` WHERE self_assessment_id = '$self_assessment_id'")
                                         ->result_array();
 
-                                        // print_r( $self_assessment_result); exit();
+                                        // print_r( $self_assessment_result);
 
                                         $nurse_comment_id = $self_assessment_result[0]['nurse_comment_id'];
 
@@ -566,8 +621,7 @@ class Model_Covid_Doctor extends CI_Model
                                         ->query(" SELECT * FROM `cv_nurse_comment` WHERE nurse_comment_id = '$nurse_comment_id'")
                                         ->result_array();
                                     
-                                        // print_r( $nurese_approve_result); exit();
-
+                                        // print_r( $nurese_approve_result);
 
                                         $this->db->trans_begin();
                                         $this->db->where('self_assessment_id', $self_assessment_id)
@@ -583,7 +637,7 @@ class Model_Covid_Doctor extends CI_Model
                 
                                         if ($this->db->trans_status() === false) {
                                             $this->db->trans_rollback();
-                                            return  array(  'status' => "false" , 'result' => "update cv_self_assessment_false" );
+                                            // return  array(  'status' => "false" , 'result' => "update cv_self_assessment_false" );
                                         } else {
                                             $this->db->trans_commit();
 
@@ -610,27 +664,35 @@ class Model_Covid_Doctor extends CI_Model
                 
                                                 if ($this->db->trans_status() === false) {
                                                     $this->db->trans_rollback();
-                                                    return  array(  'status' => "false" , 'result' => "update cv_user_latest_status" );
+                                                    // return  array(  'status' => "false" , 'result' => "update cv_user_latest_status" );
+                                             
                                                 } else {
                                                     $this->db->trans_commit();
-                                                        return array(  'status' => "true" , 'result' => "doctor_approve_wfh true");
+                                                        // return array(  'status' => "true" , 'result' => "doctor_approve_wfh true");
 
                                                 }
                                         }
-                                        // return array(  'status' => "true" , 'result' => "doctor_approve_wfh true");
                             
                                     }
     
+                            }
+
+                      
+                                return array(  'status' => "true" , 'result' => "doctor_approve_wfh true");
+                       
+                           
+
+                        }
 
 
-                    }else{
-                        return array(  'status' => "false" , 'result' => "request self_assessment_id");
-                    }
+                                   
+
+
                 }else{
-                    return array(  'status' => "false" , 'result' => "request doctor_approve_detail");
+                    return array(  'status' => "false" , 'result' => "request self_assessment_id");
                 }
             }else{
-                return array(  'status' => "false" , 'result' => "request user_ad_code");
+                return array(  'status' => "false" , 'result' => "request doctor_approve_detail");
             }
         }else{
             return array(  'status' => "false" , 'result' => "request doctor_approve_by_id");

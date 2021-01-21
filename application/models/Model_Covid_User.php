@@ -556,57 +556,63 @@ class Model_Covid_User extends CI_Model
 
     public function Set_self_assessment_timeline($result){
         if(isset($result['user_ad_code'])){
-            if(isset($result['assessment_timeline_datetime_input'])){
-                if(isset($result['assessment_timeline_result'])){
+            if(isset($result['self_assessment_id'])){
+                if(isset($result['assessment_timeline_datetime_input'])){
+                    if(isset($result['assessment_timeline_result'])){
 
             // INSERT INTO `cv_self_assessment_timeline` (`self_assessment_timeline_id`, `user_ad_code`, `assessment_timeline_datetime_input`, `assessment_timeline_result`, `assessment_timeline_datetime_create`)
             //  VALUES (NULL, '003599', '2021-01-19 14:38:16', 'dsghj', '2021-01-19 14:38:16');
 
 
-                    // $data = array();
+                        // $data = array();
 
-                    // $data['body_temp'] = array('value' => "35.5");
-                    // $data['symptom'] = array(
-                    //     'status_1'=> "1",
-                    //     'status_2'=> "1",
-                    //     'status_3'=> "1",
-                    //     'status_4'=> "1",
-                    //     'status_5'=> "1"
-                    // );
+                        // $data['body_temp'] = array('value' => "35.5");
+                        // $data['symptom'] = array(
+                        //     'status_1'=> "1",
+                        //     'status_2'=> "1",
+                        //     'status_3'=> "1",
+                        //     'status_4'=> "1",
+                        //     'status_5'=> "1"
+                        // );
 
-                    // $data['note'] = array('value' => "dsfghsfghsfghsfghsfghsfghsfghgf");
-                
-                    // $result = array(
-                    //     'user_ad_code' => "003599",
-                    //     'assessment_timeline_datetime_input' => date("Y-m-d h:i:s"),
-                    //     'assessment_timeline_result' => $data
-                    // );
-                    // return $result;
+                        // $data['note'] = array('value' => "dsfghsfghsfghsfghsfghsfghsfghgf");
+                    
+                        // $result = array(
+                        //     'user_ad_code' => "003599",
+                        //     'assessment_timeline_datetime_input' => date("Y-m-d h:i:s"),
+                        //     'assessment_timeline_result' => $data
+                        // );
+                        // return $result;
 
 
-                    $user_ad_code = $result['user_ad_code'];
- 
+                        $user_ad_code = $result['user_ad_code'];
+    
 
-                    $data = array(
-                        'self_assessment_timeline_id' => NULL,
-                        'user_ad_code' => $user_ad_code,
-                        'assessment_timeline_datetime_input' => $result['assessment_timeline_datetime_input'],
-                        'assessment_timeline_result' =>json_encode($result['assessment_timeline_result']),
-                        'assessment_timeline_datetime_create' => date("Y-m-d h:i:s")
-                    );
+                        $data = array(
+                            'self_assessment_timeline_id' => NULL,
+                            'user_ad_code' => $user_ad_code,
+                            'self_assessment_id' => $result['self_assessment_id'],
+                            'assessment_timeline_datetime_input' => $result['assessment_timeline_datetime_input'],
+                            'assessment_timeline_result' =>json_encode($result['assessment_timeline_result']),
+                            'assessment_timeline_datetime_create' => date("Y-m-d h:i:s")
+                        );
 
-                    $this->db->insert('cv_self_assessment_timeline', $data);
-                    if(($this->db->affected_rows() != 1) ? false : true){
-                        return  array(  'status' => "true" , 'result' => "insert cv_self_assessment_timeline true" );
+                        $this->db->insert('cv_self_assessment_timeline', $data);
+                        if(($this->db->affected_rows() != 1) ? false : true){
+                            return  array(  'status' => "true" , 'result' => "insert cv_self_assessment_timeline true" );
+                        }
+
+                    
+                    }else{
+                        return  array(  'status' => "false" , 'result' => "request assessment_timeline_result" ); 
                     }
-
+                
                 }else{
-                    return  array(  'status' => "false" , 'result' => "request assessment_timeline_result" ); 
+                    return  array(  'status' => "false" , 'result' => "request assessment_timeline_datetime_input" ); 
                 }
             }else{
-                return  array(  'status' => "false" , 'result' => "request assessment_timeline_datetime_input" );
+                return  array(  'status' => "false" , 'result' => "request self_assessment_id" );
             }
-
 
         }else{
             return  array(  'status' => "false" , 'result' => "request user_ad_code" );
@@ -654,7 +660,7 @@ class Model_Covid_User extends CI_Model
 
                             if($self_assessment_detail_result[0]['self_assessment_detail_sum_result'] == "1"){
                                
-                                return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => "work from 3"  ));
+                                return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
 
                             }else{
                                 return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
@@ -670,7 +676,7 @@ class Model_Covid_User extends CI_Model
 
                                 if($latest_status_result[0]['doctor_approve_status_wfh'] == "0" ){
 
-                                    return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => "work from 3"  ));
+                                    return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
 
                                 }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "1"){
 
@@ -686,7 +692,7 @@ class Model_Covid_User extends CI_Model
                                         $datenow = date("Y-m-d h:i:s");
 
                                         if($nurse_approve_wfh_date_end < $datenow){
-                                            return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => "work from 3"  ));
+                                            return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
                                         }else{
                                             return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                                         }
@@ -1248,7 +1254,7 @@ class Model_Covid_User extends CI_Model
                 // $self_assessment_result_specific = $query_detail[$i]["self_assessment_result_specific"];
                
                 $query_detail[$i]['self_assessment_TextNormal'] = $this->db
-                ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                ->query("SELECT *  FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                 ->result_array();
 
                 // $query_detail[$i]['self_assessment_TextSpecific'] = $this->db
@@ -1302,7 +1308,7 @@ class Model_Covid_User extends CI_Model
                 // $self_assessment_result_specific = $query_detail[$i]["self_assessment_result_specific"];
                 
                 $query_detail[$i]['self_assessment_TextNormal'] = $this->db
-                ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                ->query("SELECT * FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                 ->result_array();
 
                 // $query_detail[$i]['self_assessment_TextSpecific'] = $this->db
@@ -1409,7 +1415,7 @@ class Model_Covid_User extends CI_Model
                     // $self_assessment_result_specific = $self_assessment_result[$i]["self_assessment_result_specific"];
                    
                     $self_assessment_result[$i]['self_assessment_TextNormal'] = $this->db
-                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_normal'")
+                    ->query("SELECT *  FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_normal'")
                     ->result_array();
     
                     // $self_assessment_result[$i]['self_assessment_TextSpecific'] = $this->db
