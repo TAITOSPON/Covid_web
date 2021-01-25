@@ -949,7 +949,7 @@ class Model_Covid_User extends CI_Model
                     // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
                     
                     $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
-                    ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                    ->query("SELECT * FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
                     ->result_array();
     
                     // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
@@ -1027,8 +1027,30 @@ class Model_Covid_User extends CI_Model
                     }else{
                         $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['user_self_assessment_result_detail'] = array();
                     }
-                   
-                   
+
+
+                    $self_assessment_timeline_result = $this->db
+                    ->query("SELECT * FROM `cv_self_assessment_timeline` WHERE user_ad_code = '$user_ad_code' AND self_assessment_id = '$self_assessment_id'")
+                    ->result_array();
+
+
+                    if(sizeof($self_assessment_timeline_result) != 0){
+
+                    
+                        for($index_self_assessment_timeline_result=0; $index_self_assessment_timeline_result < sizeof($self_assessment_timeline_result); $index_self_assessment_timeline_result++){
+
+                            $assessment_timeline_result = array(json_decode($self_assessment_timeline_result[$index_self_assessment_timeline_result]['assessment_timeline_result'], true)); 
+                     
+
+                            $self_assessment_timeline_result[$index_self_assessment_timeline_result]['assessment_timeline_result'] = $assessment_timeline_result; 
+                        }
+
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['user_self_assessment_result_timeline'] =  $self_assessment_timeline_result;
+                  
+
+                    }else{
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['user_self_assessment_result_timeline'] = array();
+                    }
 
                 }
             }
@@ -1770,7 +1792,9 @@ class Model_Covid_User extends CI_Model
 
     public function Alert_to_Nurse($text){
 
-        $line_token = "CedBa3gSQAB8GBN3chetiN9jNUaywR4Xk4hSMzxasRf";
+        // $line_token = "CedBa3gSQAB8GBN3chetiN9jNUaywR4Xk4hSMzxasRf";
+        $line_token = "64JsHmBC8bdTRd27NOUyXhPqZmRRGPJkmq79kmNycLX";
+        
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, 'https://notify-api.line.me/api/notify');
         curl_setopt($ch, CURLOPT_POST, true);

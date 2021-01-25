@@ -44,13 +44,14 @@ class Model_Covid_Doctor extends CI_Model
 
     public function Get_All_Dept_Name(){
         // $user = $this->db->query("SELECT DISTINCT user_ad_dept_code FROM cv_user")->result_array();
+
         $user = $this->db
         ->query("SELECT DISTINCT user_ad_dept_code 
             FROM `cv_user_latest_status` 
-            INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code 
-            WHERE `chief_approve_result_check` = 2")
+            INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code ")
+            // WHERE `chief_approve_result_check` = 2")
         ->result_array();
-        
+        //    print_r($this->db->last_query());  exit();
         $data = array();
 
         for($i=0; $i < sizeof($user); $i++){
@@ -87,6 +88,8 @@ class Model_Covid_Doctor extends CI_Model
           
         }
         return array(  'status' => "true" , 'result' => $data_DEPT);
+
+
         // print_r($data_DEPT); exit();
         
     }
@@ -125,7 +128,7 @@ class Model_Covid_Doctor extends CI_Model
                         ->query("SELECT * FROM `cv_self_assessment`
                             WHERE `user_ad_code` =  '$user_ad_code'
                             -- AND `chief_approve_result_check` = 2
-                            AND `nurse_comment_id` != 0 
+                            -- AND `nurse_comment_id` != 0 
                             ORDER BY `self_assessment_id` DESC LIMIT 100")
                         ->result_array();
 
@@ -241,7 +244,7 @@ class Model_Covid_Doctor extends CI_Model
                     ->query("SELECT * FROM `cv_self_assessment`
                         WHERE `user_ad_code` =  '$user_ad_code'
                         -- AND `chief_approve_result_check` = 2
-                        AND `nurse_comment_id` != 0 
+                        -- AND `nurse_comment_id` != 0 
                         ORDER BY `self_assessment_id` DESC LIMIT 100")
                     ->result_array();
 
@@ -588,6 +591,19 @@ class Model_Covid_Doctor extends CI_Model
                                     $doctor_approve_detail = $result['doctor_approve_detail'];
 
 
+                                    $self_assessment_result = $this->db
+                                    ->query(" SELECT * FROM `cv_self_assessment` WHERE self_assessment_id = '$self_assessment_id'")
+                                    ->result_array();
+
+                                    // print_r( $self_assessment_result);
+
+                                    $nurse_comment_id = $self_assessment_result[0]['nurse_comment_id'];
+
+                                    $nurese_approve_result = $this->db
+                                    ->query(" SELECT * FROM `cv_nurse_comment` WHERE nurse_comment_id = '$nurse_comment_id'")
+                                    ->result_array();
+                                
+                                    // print_r( $nurese_approve_result);
 
 
                                     $data = array(
@@ -597,6 +613,7 @@ class Model_Covid_Doctor extends CI_Model
                                         'doctor_approve_result' =>  "1",
                                         'doctor_approve_datetime_create' => date("Y-m-d h:i:s"),
                                         'doctor_approve_detail' =>  $doctor_approve_detail,
+                                        'doctor_approve_status_wfh' => $nurese_approve_result[0]['nurse_approve_status_wfh'],
                             
                                     );
     
@@ -609,19 +626,7 @@ class Model_Covid_Doctor extends CI_Model
 
                                         // print_r( $doctor_approve_result);
                                         
-                                        $self_assessment_result = $this->db
-                                        ->query(" SELECT * FROM `cv_self_assessment` WHERE self_assessment_id = '$self_assessment_id'")
-                                        ->result_array();
-
-                                        // print_r( $self_assessment_result);
-
-                                        $nurse_comment_id = $self_assessment_result[0]['nurse_comment_id'];
-
-                                        $nurese_approve_result = $this->db
-                                        ->query(" SELECT * FROM `cv_nurse_comment` WHERE nurse_comment_id = '$nurse_comment_id'")
-                                        ->result_array();
-                                    
-                                        // print_r( $nurese_approve_result);
+                                  
 
                                         $this->db->trans_begin();
                                         $this->db->where('self_assessment_id', $self_assessment_id)
@@ -646,7 +651,7 @@ class Model_Covid_Doctor extends CI_Model
                                                     $data = array(
                                                         'doctor_approve_result_check' => $doctor_approve_result[0]['doctor_approve_result'],
                                                         'doctor_approve_id' => $doctor_approve_result[0]['doctor_approve_id'],
-                                                        'doctor_approve_status_wfh' => $nurese_approve_result[0]['doctor_approve_status_wfh'],
+                                                        'doctor_approve_status_wfh' => $doctor_approve_result[0]['doctor_approve_status_wfh'],
                                                         'self_assessment_sum_result' => "1"
                                                     );
 
