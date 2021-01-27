@@ -1673,7 +1673,7 @@ class Model_Covid_User extends CI_Model
 
                     // $user_ad_id_recrive = "003599";
                     $user_ad_id_recrive = $boss_result[0]['member_ad_boss'];
-                    $user_ad_id_recrive_name =  $chief_result[0]['member_name_boss'];
+                    $user_ad_id_recrive_name =  $boss_result[0]['member_name_boss'];
                    
                     
                     $text = "แจ้งเตือน ".$user_ad_id_recrive_name.
