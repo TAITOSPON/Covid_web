@@ -614,6 +614,8 @@ class Model_Covid_Doctor extends CI_Model
                                         'doctor_approve_datetime_create' => date("Y-m-d h:i:s"),
                                         'doctor_approve_detail' =>  $doctor_approve_detail,
                                         'doctor_approve_status_wfh' => $nurese_approve_result[0]['nurse_approve_status_wfh'],
+                                        'doctor_approve_wfh_date_start' => $nurese_approve_result[0]['nurse_approve_wfh_date_start'],
+                                        'doctor_approve_wfh_date_end' => $nurese_approve_result[0]['nurse_approve_wfh_date_end'],
                             
                                     );
     
@@ -662,6 +664,20 @@ class Model_Covid_Doctor extends CI_Model
                                                         'doctor_approve_status_wfh' => $doctor_approve_result[0]['doctor_approve_status_wfh'],
                 
                                                     );
+
+                                                    // insert tp table WFH
+
+                                                    $data = array(
+                                                        'WFH_EN_NUMBER' => $user_ad_code ,
+                                                        'WFH_ST_DATE'   => $doctor_approve_result[0]['doctor_approve_wfh_date_start'],
+                                                        'WFH_ED_DATE'   => $doctor_approve_result[0]['doctor_approve_wfh_date_end'],
+                                                        'WFH_REMARK'    => 'FROM DOCTOR - Covid19',
+                                                        'APPR_BY'	    => 'DOCTOR',
+                                                        'create_by'     => $doctor_approve_by_id,
+                                                        'create_date'   => date("Y-m-d h:i:s")
+                                                    );
+
+                                                    $this->Insert_user_WFH($data);
                                                 }
 
                                                 $this->db->trans_begin();
@@ -705,6 +721,20 @@ class Model_Covid_Doctor extends CI_Model
 
         
     }
+    
+    public function Insert_user_WFH( $data ){
 
+       
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_Member/Member_User_Profile_withAD');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( $data ) );
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return  $result;
+    }
    
 } 

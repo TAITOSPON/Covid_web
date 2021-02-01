@@ -3,6 +3,30 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Model_Covid_User extends CI_Model
 {       
+
+
+    public function Clear_data($result){
+        $user_ad_code = $result['user_ad_code'];
+
+
+        $this->db->delete('cv_user_policy', array('user_ad_code' => $user_ad_code)); 
+        echo $this->db->last_query(); 
+        $this->db->delete('cv_user_latest_status', array('user_ad_code' => $user_ad_code)); 
+        echo $this->db->last_query(); 
+        $this->db->delete('cv_self_assessment', array('user_ad_code' => $user_ad_code)); 
+        echo $this->db->last_query(); 
+        $this->db->delete('cv_self_assessment_detail', array('user_ad_code' => $user_ad_code)); 
+        echo $this->db->last_query(); 
+        
+        $this->db->delete('cv_chief_approve', array('user_ad_code' => $user_ad_code)); 
+        echo $this->db->last_query(); 
+        $this->db->delete('cv_doctor_approve', array('user_ad_code' => $user_ad_code)); 
+        echo $this->db->last_query(); 
+        $this->db->delete('cv_nurse_comment', array('user_ad_code' => $user_ad_code)); 
+        echo $this->db->last_query(); 
+
+        // return  $this->db->last_query(); 
+    }
     
     public function Get_user_detail($user_ad_code){
    
@@ -215,7 +239,8 @@ class Model_Covid_User extends CI_Model
                         'user_ad_dept_name' => $user_detail['result']['personal']['Department'],
                         'user_ad_birth_date' => $this->date_thai_to_eng($user_detail['result']['personal']['BirthDate']),
                         'user_ad_sex' => $user_detail['result']['personal']['Sex'],
-                        'user_ad_tel' => $result['user_ad_tel']
+                        'user_ad_tel' => $result['user_ad_tel'],
+                        'user_ad_tel_intra' => ""
                     );
                 
                 $this->db->insert('cv_user', $data);
@@ -233,7 +258,8 @@ class Model_Covid_User extends CI_Model
                     'user_ad_dept_name' => $user_detail['result']['personal']['Department'],
                     'user_ad_birth_date' => $this->date_thai_to_eng($user_detail['result']['personal']['BirthDate']),
                     'user_ad_sex' => $user_detail['result']['personal']['Sex'],
-                    'user_ad_tel' => $result['user_ad_tel']
+                    'user_ad_tel' => $result['user_ad_tel'],
+                    'user_ad_tel_intra' => ""
                 );
 
                 $this->db->trans_begin();
@@ -1617,6 +1643,36 @@ class Model_Covid_User extends CI_Model
     }
 
 
+    public function Get_Boss_by_ad($result){
+
+        if(isset($result['user_ad_code'])){
+
+            $user_ad_code = $result['user_ad_code'];
+
+            $chief_result = array(json_decode($this->Get_id_chief_by_dapt_code($user_ad_code), true));
+
+            if(sizeof($chief_result) != 0){
+
+                if( $user_ad_code == $chief_result[0]['PN_NO'] ){
+
+                    $boss_result = $this->Get_Boss_by_ad_Director($user_ad_code);
+                    if(sizeof($boss_result) != 0){
+                    
+                        return  array(  'status' => "true" , 'result' => array('user_ad_boss' => $boss_result[0]['member_ad_boss']) );
+                      
+                    }
+
+                }else{
+                    return  array(  'status' => "true" , 'result' => array('user_ad_boss' => $chief_result[0]['PN_NO']) );
+                }
+            }
+
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
+        }
+      
+    }
+
 
     public function Alert_to_Chief($form,$user_ad_code,$self_assessment_result){
   
@@ -1806,6 +1862,9 @@ class Model_Covid_User extends CI_Model
         curl_close($ch);
         return  $result;
     }
+
+
+
 
 
 
