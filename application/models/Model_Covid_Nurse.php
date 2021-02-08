@@ -78,8 +78,11 @@ class Model_Covid_Nurse extends CI_Model
 
         for($i=0; $i < sizeof($data_DEPT_CODE); $i++){
                 
+            // $data_DEPT[$i]['DEPT_CODE'] = $data_DEPT_CODE[$i];   
+            // $data_DEPT[$i]['DEPT_NAME'] = $data_DEPT_NAME[$i];   
+
             $data_DEPT[$i]['DEPT_CODE'] = $data_DEPT_CODE[$i];   
-            $data_DEPT[$i]['DEPT_NAME'] = $data_DEPT_NAME[$i];   
+            $data_DEPT[$i]['DEPT_NAME'] = $data_DEPT_CODE[$i];  
           
         }
         return array(  'status' => "true" , 'result' => $data_DEPT);
@@ -107,7 +110,12 @@ class Model_Covid_Nurse extends CI_Model
                     $user_result = $this->db
                         ->query("SELECT * FROM `cv_user_latest_status`
                             INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
-                            WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'")
+                            WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
+                        
+                            AND `cv_user_latest_status`.`self_assessment_sum_result` !=1
+                            -- AND `cv_user_latest_status`.`self_assessment_sum_result` !=2
+
+                            ")
                         ->result_array();
                             // print_r($this->db->last_query());  exit();
                     // print_r($); exit();
@@ -205,10 +213,16 @@ class Model_Covid_Nurse extends CI_Model
                       
 
                     }
-    
+                    
                     $result_dept[$i]["RESULT_ALL_USER"] = $user_result ;
-    
+
+                    $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
+                    $result_dept[$i]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
                 }
+
+
+
+
     
             }else{
 
@@ -223,8 +237,12 @@ class Model_Covid_Nurse extends CI_Model
                 $user_result = $this->db
                 ->query("SELECT * FROM `cv_user_latest_status`
                     INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
-                    WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'")
+                    WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
+             
+                        -- AND `cv_user_latest_status`.`self_assessment_sum_result` !=1
+                    ")
                 ->result_array();
+
 
                 for($index_user_result=0; $index_user_result < sizeof($user_result); $index_user_result++){
                     
@@ -323,8 +341,19 @@ class Model_Covid_Nurse extends CI_Model
                 $result_dept[0]['RESULT_ALL_USER'] = $user_result;
               
             }
-          
-            return array(  'status' => "true" , 'result' => $result_dept);
+
+
+            $data = array(  'status' => "true" , 'result' => $result_dept);
+
+              for($j=0; $j < sizeof($result_dept); $j++){
+                   
+                    if(sizeof( $result_dept[$j]['RESULT_ALL_USER'] ) == 0 ){
+                        unset($data['result'][$j]);
+                    }
+
+                }
+            return $data ;
+            // return array(  'status' => "true" , 'result' => $result_dept);
         }else{
             return array(  'status' => "false" , 'result' => "request dept_code");
         }

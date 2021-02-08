@@ -209,7 +209,11 @@ class Api_Covid_User extends REST_Controller{
 
 
    
-
+       public function test_get(){
+              // $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_Doctor->Get_All_Dept_Name();  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);    
+       }
      
 
 }

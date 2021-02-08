@@ -62,6 +62,7 @@ class Model_Covid_Doctor extends CI_Model
         }
 
         $result_dept_name['DEPT_CODE'] = array_unique($data);
+        // return $result_dept_name;
        
         $data = array();
         for($i=0; $i < sizeof($user); $i++){
@@ -71,8 +72,9 @@ class Model_Covid_Doctor extends CI_Model
             $data[$i] = $result_dept[0]['DEPT_NAME'];   
         }
 
+        // return $data;
         $result_dept_name['DEPT_NAME'] = array_unique($data);
-
+        // return $result_dept_name;
 
         $data_DEPT_NAME = array();
         $data_DEPT_CODE = array();
@@ -83,8 +85,12 @@ class Model_Covid_Doctor extends CI_Model
 
         for($i=0; $i < sizeof($data_DEPT_CODE); $i++){
                 
+            // $data_DEPT[$i]['DEPT_CODE'] = $data_DEPT_CODE[$i];   
+            // $data_DEPT[$i]['DEPT_NAME'] = $data_DEPT_NAME[$i];   
+
             $data_DEPT[$i]['DEPT_CODE'] = $data_DEPT_CODE[$i];   
-            $data_DEPT[$i]['DEPT_NAME'] = $data_DEPT_NAME[$i];   
+            $data_DEPT[$i]['DEPT_NAME'] = $data_DEPT_CODE[$i];  
+
           
         }
         return array(  'status' => "true" , 'result' => $data_DEPT);
@@ -114,8 +120,13 @@ class Model_Covid_Doctor extends CI_Model
                     $user_result = $this->db
                         ->query("SELECT * FROM `cv_user_latest_status`
                             INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
-                            WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'")
-                            // AND `cv_user_latest_status`.chief_approve_result_check = 2")
+                            WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
+
+                            AND `cv_user_latest_status`.`self_assessment_sum_result` !=1
+                            --  AND `cv_user_latest_status`.chief_approve_result_check = 2
+
+                          ")
+
                         ->result_array();
                             // print_r($this->db->last_query());  exit();
                     // print_r($); exit();
@@ -215,6 +226,9 @@ class Model_Covid_Doctor extends CI_Model
                     }
     
                     $result_dept[$i]["RESULT_ALL_USER"] =  $user_result ;
+
+                    $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
+                    $result_dept[$i]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
     
                 }
     
@@ -231,8 +245,10 @@ class Model_Covid_Doctor extends CI_Model
                 $user_result = $this->db
                 ->query("SELECT * FROM `cv_user_latest_status`
                     INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
-                    WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'")
-                    // AND `cv_user_latest_status`.chief_approve_result_check = 2")
+                    WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
+                  
+                    AND `cv_user_latest_status`.`self_assessment_sum_result` !=1
+                    ")
                 ->result_array();
 
                 for($index_user_result=0; $index_user_result < sizeof($user_result); $index_user_result++){
@@ -333,8 +349,32 @@ class Model_Covid_Doctor extends CI_Model
                 $result_dept[0]['RESULT_ALL_USER'] = $user_result;
               
             }
+
+            $data = array(  'status' => "true" , 'result' => $result_dept);
+
+            for($j=0; $j < sizeof($result_dept); $j++){
+                 
+                  if(sizeof( $result_dept[$j]['RESULT_ALL_USER'] ) == 0 ){
+                      unset($data['result'][$j]);
+                  }else{
+
+                    for($n=0; $n < sizeof($result_dept[$j]['RESULT_ALL_USER']); $n++){
+
+                        if(sizeof( $result_dept[$j]['RESULT_ALL_USER'][$n]['user_self_assessment_result'] ) == 0 ){
+                            unset($data['result'][$j]);
+                        }
+                        
+                    }
+
+
+                  }
+
+              }
+
+
+            return $data ;
           
-            return array(  'status' => "true" , 'result' => $result_dept);
+            // return array(  'status' => "true" , 'result' => $result_dept);
         }else{
             return array(  'status' => "false" , 'result' => "request dept_code");
         }

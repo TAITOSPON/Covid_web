@@ -164,7 +164,22 @@ class Model_Covid_User extends CI_Model
                 ->result_array();
             
             if(sizeof($member_rule_result) != 0){
-                return array(  'status' => "true" , 'result' => array(array('member_type' => $member_rule_result[0]['member_type'])));
+
+                if(sizeof($member_rule_result) > 1){
+
+                    for ($i=0; $i <sizeof($member_rule_result) ; $i++) { 
+
+                        if($member_rule_result[$i]['member_type'] == "doctor"){
+                            return array(  'status' => "true" , 'result' => array(array('member_type' => $member_rule_result[$i]['member_type'])));
+                        }
+            
+                    }
+                    
+                }else{
+                    return array(  'status' => "true" , 'result' => array(array('member_type' => $member_rule_result[0]['member_type'])));
+                }
+
+             
             }else{
                 return array(  'status' => "true" , 'result' => array(array('member_type' => "user")));
             }
@@ -911,23 +926,30 @@ class Model_Covid_User extends CI_Model
             ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "1"')
             ->result_array();
 
-        $blue = $this->db
-            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "2" and doctor_approve_status_wfh !=1')
-            ->result_array();
+        // $blue = $this->db
+        //     ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "2" and doctor_approve_status_wfh !=1')
+        //     ->result_array();
 
-        $yellow = $this->db
-            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "3" and doctor_approve_status_wfh !=1')
-            ->result_array();
+        // $yellow = $this->db
+        //     ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "3" and doctor_approve_status_wfh !=1')
+        //     ->result_array();
 
-        $orange = $this->db
-            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "4" and doctor_approve_status_wfh !=1')
-            ->result_array();
+        // $orange = $this->db
+        //     ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "4" and doctor_approve_status_wfh !=1')
+        //     ->result_array();
 
-        $red = $this->db
-            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "5" and doctor_approve_status_wfh !=1')
-            ->result_array();
+        // $red = $this->db
+        //     ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "5" and doctor_approve_status_wfh !=1')
+        //     ->result_array();
             
-        $risk =  ((int)$blue)+((int)$yellow)+((int)$orange)+((int)$red);
+        // $risk =  ((int)$blue)+((int)$yellow)+((int)$orange)+((int)$red);
+
+        $risk = $this->db
+        ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result != "1" and doctor_approve_status_wfh !=1')
+        ->result_array();
+
+
+        
         
         $yellow_user_count = $this->db
             ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE  doctor_approve_status_wfh =1')
@@ -937,7 +959,7 @@ class Model_Covid_User extends CI_Model
             'all_user_count' => $query_all[0]['count(*)'],
             'green_user_count' => $query_green[0]['count(*)'],
             'yellow_user_count' => $yellow_user_count[0]['count(*)'],
-            'red_user_count' => $risk,  
+            'red_user_count' => $risk[0]['count(*)'],  
         );     
 
         $result = array( 
