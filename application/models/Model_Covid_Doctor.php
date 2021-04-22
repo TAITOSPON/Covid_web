@@ -707,7 +707,7 @@ class Model_Covid_Doctor extends CI_Model
 
                                                     // insert tp table WFH
 
-                                                    $data = array(
+                                                    $data_insert = array(
                                                         'WFH_EN_NUMBER' => $user_ad_code ,
                                                         'WFH_ST_DATE'   => $doctor_approve_result[0]['doctor_approve_wfh_date_start'],
                                                         'WFH_ED_DATE'   => $doctor_approve_result[0]['doctor_approve_wfh_date_end'],
@@ -717,7 +717,7 @@ class Model_Covid_Doctor extends CI_Model
                                                         'create_date'   => date("Y-m-d h:i:s")
                                                     );
 
-                                                    $this->Insert_user_WFH($data);
+                                                    $this->Insert_user_WFH($data_insert);
                                                 }
 
                                                 $this->db->trans_begin();
@@ -766,7 +766,7 @@ class Model_Covid_Doctor extends CI_Model
 
        
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_Member/Member_User_Profile_withAD');
+        curl_setopt($ch, CURLOPT_URL, 'https://change.toat.co.th/timeatt/index.php/api/chk_inout/insertWFH');
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

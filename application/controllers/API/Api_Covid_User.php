@@ -171,6 +171,12 @@ class Api_Covid_User extends REST_Controller{
 
        }
 
+       public function Nurse_All_user_action_with_date_get(){
+
+              $result = $this->Model_Covid_Nurse->Nurse_get_all_user_action_with_date();  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
+
        // FOR Nurse +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      
 
@@ -200,7 +206,9 @@ class Api_Covid_User extends REST_Controller{
 
               $data = json_decode(file_get_contents('php://input'), true);
               $result = $this->Model_Covid_Doctor->Doctor_approve_status_wfh($data);  
-              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);    
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT); 
+              
+              // print_r($result);
        }
 
        

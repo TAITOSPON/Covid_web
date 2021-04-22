@@ -920,10 +920,12 @@ class Model_Covid_User extends CI_Model
 
         $query_all = $this->db
             ->query('SELECT count(*) FROM `cv_user_latest_status`')
+            // ->query('SELECT count(*) FROM `cv_user`')
             ->result_array();
 
         $query_green = $this->db
             ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "1"')
+            // ->query('SELECT count(*) FROM `cv_user`')
             ->result_array();
 
         // $blue = $this->db

@@ -345,7 +345,7 @@ class Model_Covid_Nurse extends CI_Model
 
             $data = array(  'status' => "true" , 'result' => $result_dept);
 
-              for($j=0; $j < sizeof($result_dept); $j++){
+                for($j=0; $j < sizeof($result_dept); $j++){
                    
                     if(sizeof( $result_dept[$j]['RESULT_ALL_USER'] ) == 0 ){
                         unset($data['result'][$j]);
@@ -442,6 +442,17 @@ class Model_Covid_Nurse extends CI_Model
         }
 
 
+    }
+
+
+    public function Nurse_get_all_user_action_with_date(){
+        $query = $this->db
+        ->query("SELECT DISTINCT `cv_user`.user_ad_code ,  `cv_user`.user_ad_name  ,  `cv_user`.`user_ad_dept_name` ,  `cv_user`.`user_ad_sex`   , `cv_user`.`user_ad_tel`
+        FROM `cv_self_assessment`    INNER JOIN `cv_user` on `cv_self_assessment`.user_ad_code  =  `cv_user`.user_ad_code ")
+        ->result_array();
+
+        return array(  'status' => "true" , 'result' =>  $query);
+       
     }
 
 }
