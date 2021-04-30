@@ -10,6 +10,7 @@ class Api_Covid_User extends REST_Controller{
               $this->load->model('Model_Covid_User');
               $this->load->model('Model_Covid_Nurse');
               $this->load->model('Model_Covid_Doctor');
+              $this->load->model('Model_Covid_Report');
        }
 
        public function index_get(){
@@ -76,10 +77,7 @@ class Api_Covid_User extends REST_Controller{
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
 
-       public function GetSumStatus_get(){
-              $result = $this->Model_Covid_User->Get_Sum_Status();  
-              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
-       }
+     
 
 
 
@@ -222,6 +220,17 @@ class Api_Covid_User extends REST_Controller{
               $result = $this->Model_Covid_Doctor->Get_All_Dept_Name();  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);    
        }
-     
+
+       // FOR REPORT +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+       public function GetSumStatus_get(){
+              $result = $this->Model_Covid_User->Get_Sum_Status();  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
+
+       public function GetSumStatus_Detail_post(){
+              $result = $this->Model_Covid_Report->Get_Sum_Status_Detail();  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
 
 }
