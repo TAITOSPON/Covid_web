@@ -697,23 +697,28 @@ class Model_Covid_User extends CI_Model
 
                             // $self_assessment_detail_sum_result = $self_assessment_detail_result
                             // return $self_assessment_detail_result[0]['self_assessment_detail_result'];
-                            $self_assessment_detail_result = array(json_decode($self_assessment_detail_result[0]['self_assessment_detail_result'], true));
 
-                            if($self_assessment_detail_result[0]['self_assessment_detail_sum_result'] == "1"){
-                               
-                                return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+                            if($self_assessment_result[0]['chief_approve_result_check'] != "1" ){
 
+                                $self_assessment_detail_result = array(json_decode($self_assessment_detail_result[0]['self_assessment_detail_result'], true));
+
+                                if($self_assessment_detail_result[0]['self_assessment_detail_sum_result'] == "1"){
+                                
+                                    return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+
+                                }else{
+                                    return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                }
                             }else{
                                 return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                             }
-
 
                     }else{
 
                         // print_r($latest_status_result); exit();
                         if($latest_status_result[0]['self_assessment_sum_result'] == "5"){
 
-                            if($latest_status_result[0]['chief_approve_result_check'] != "1" ){
+                            if($self_assessment_result[0]['chief_approve_result_check'] != "1" ){
 
                                 if($latest_status_result[0]['doctor_approve_status_wfh'] == "0" ){
 
