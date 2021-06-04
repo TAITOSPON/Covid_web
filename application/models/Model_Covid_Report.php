@@ -148,11 +148,11 @@ class Model_Covid_Report extends CI_Model {
     }
 
 
-    public function Get_Sum_Status_Detail(){
+
+    public function Get_All_User_Quarantine(){
         $result_count = array( 
 
-            'yellow_user_detail' => $this->Get_Sum_Status_Yellow_Detail(),
-            'red_user_detail' => $this->Get_Sum_Status_Red_Detail(),
+            'user_quarantine_detial' => $this->Get_Sum_Status_Yellow_Detail(),
             
         );     
 
@@ -166,13 +166,70 @@ class Model_Covid_Report extends CI_Model {
         return $result;
     }
 
-    public function Get_Sum_Status_Yellow_Detail(){
+    public function Get_Sum_Status_Detail($data){
 
-            $dept_query_yellow = "SELECT DISTINCT user_ad_dept_code 
-                                    FROM `cv_user_latest_status` 
-                                    INNER JOIN `cv_user` 
-                                    ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
-                                    WHERE  `cv_user_latest_status`.doctor_approve_status_wfh = 1";
+        if(isset($data['dept_code'])){
+            $result_count = array( 
+
+                'yellow_user_detail' => $this->Get_Sum_Status_Yellow_Detail($data['dept_code']),
+                'red_user_detail' => $this->Get_Sum_Status_Red_Detail($data['dept_code']),
+                
+            );     
+    
+            $result = array( 
+                'status' => "true",
+                'result' => $result_count
+                 
+            );     
+            
+            return $result;
+
+        }else{
+
+            $result_count = array( 
+
+                'yellow_user_detail' => $this->Get_Sum_Status_Yellow_Detail("0000"),
+                'red_user_detail' => $this->Get_Sum_Status_Red_Detail("0000"),
+                
+            );     
+    
+            $result = array( 
+                'status' => "true",
+                'result' => $result_count
+                 
+            );     
+            
+            return $result;
+            
+        }
+       
+
+    }
+
+
+
+    // yellow = กักตัว
+    public function Get_Sum_Status_Yellow_Detail($dept_code){
+
+            if($dept_code == "0000"){
+
+                $dept_query_yellow = "SELECT DISTINCT user_ad_dept_code 
+                FROM `cv_user_latest_status` 
+                INNER JOIN `cv_user` 
+                ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+                WHERE  `cv_user_latest_status`.doctor_approve_status_wfh = 1";
+            
+            }else{
+
+                $dept_query_yellow = "SELECT DISTINCT user_ad_dept_code 
+                FROM `cv_user_latest_status` 
+                INNER JOIN `cv_user` 
+                ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+                WHERE  `cv_user_latest_status`.doctor_approve_status_wfh = 1
+                AND `cv_user`.`user_ad_dept_code` LIKE '$dept_code%' ";
+            }
+        
+
 
             $result_dept = $this->Get_All_Dept_Name($dept_query_yellow);
             $result_dept =  $result_dept['result'];
@@ -297,14 +354,28 @@ class Model_Covid_Report extends CI_Model {
             return $result_dept;
     }
 
-    public function Get_Sum_Status_Red_Detail(){
-          
-            $dept_query_red = "SELECT DISTINCT user_ad_dept_code 
-                                    FROM `cv_user_latest_status` 
-                                    INNER JOIN `cv_user` 
-                                    ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
-                                    WHERE `cv_user_latest_status`.self_assessment_sum_result != 1 
-                                    AND `cv_user_latest_status`.doctor_approve_status_wfh !=1 ";
+    public function Get_Sum_Status_Red_Detail($dept_code){
+           
+            if($dept_code == "0000"){
+
+                $dept_query_red = "SELECT DISTINCT user_ad_dept_code 
+                FROM `cv_user_latest_status` 
+                INNER JOIN `cv_user` 
+                ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+                WHERE `cv_user_latest_status`.self_assessment_sum_result != 1 
+                AND `cv_user_latest_status`.doctor_approve_status_wfh !=1 ";
+
+            }else{
+
+                $dept_query_red = "SELECT DISTINCT user_ad_dept_code 
+                FROM `cv_user_latest_status` 
+                INNER JOIN `cv_user` 
+                ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+                WHERE `cv_user_latest_status`.self_assessment_sum_result != 1 
+                AND `cv_user_latest_status`.doctor_approve_status_wfh !=1 
+                AND `cv_user`.`user_ad_dept_code` LIKE '$dept_code%' ";
+            }
+     
                             
 
             $result_dept = $this->Get_All_Dept_Name($dept_query_red);

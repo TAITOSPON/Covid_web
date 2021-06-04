@@ -700,15 +700,52 @@ class Model_Covid_User extends CI_Model
 
                             if($self_assessment_result[0]['chief_approve_result_check'] != "1" ){
 
-                                $self_assessment_detail_result = array(json_decode($self_assessment_detail_result[0]['self_assessment_detail_result'], true));
 
-                                if($self_assessment_detail_result[0]['self_assessment_detail_sum_result'] == "1"){
-                                
-                                    return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+                                if($latest_status_result[0]['doctor_approve_status_wfh'] == "0" ){
 
-                                }else{
+
+                                    $self_assessment_detail_result = array(json_decode($self_assessment_detail_result[0]['self_assessment_detail_result'], true));
+
+                                    if($self_assessment_detail_result[0]['self_assessment_detail_sum_result'] == "1"){
+                                    
+                                        return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+
+                                    }else{
+                                        return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                    }
+
+
+                                }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "1"){
+
+                                    $doctor_approve_id = $latest_status_result[0]['doctor_approve_id'];
+
+                                    $cv_doctor_approve = $this->db
+                                    ->query("SELECT * FROM `cv_doctor_approve`WHERE doctor_approve_id  = '$doctor_approve_id'")
+                                    ->result_array();
+                                   
+                                    if(sizeof($cv_doctor_approve) != 0){
+
+                                        $doctor_approve_wfh_date_end = $cv_doctor_approve[0]['doctor_approve_wfh_date_end'];
+                                        $datenow = date("Y-m-d h:i:s");
+
+                                        if($doctor_approve_wfh_date_end > $datenow){
+                                            return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+                                        }else{
+                                            return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                        }
+
+                                    }else{
+                                        return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                    }
+
+                               
+
+                                }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "2"){
                                     return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                                 }
+
+
+
                             }else{
                                 return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                             }
@@ -729,7 +766,7 @@ class Model_Covid_User extends CI_Model
                                     $nurse_comment_id = $self_assessment_result[0]['nurse_comment_id'];
 
                                     $nurse_comment_result = $this->db
-                                    ->query("SELECT * FROM `cv_nurse_comment`WHERE nurse_comment_id = '$nurse_comment_result'")
+                                    ->query("SELECT * FROM `cv_nurse_comment`WHERE nurse_comment_id = '$nurse_comment_id'")
                                     ->result_array();
                                    
                                     if(sizeof($nurse_comment_result) != 0){
@@ -737,7 +774,7 @@ class Model_Covid_User extends CI_Model
                                         $nurse_approve_wfh_date_end = $nurse_comment_result[0]['nurse_approve_wfh_date_end'];
                                         $datenow = date("Y-m-d h:i:s");
 
-                                        if($nurse_approve_wfh_date_end < $datenow){
+                                        if($nurse_approve_wfh_date_end > $datenow){
                                             return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
                                         }else{
                                             return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
