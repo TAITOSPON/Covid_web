@@ -152,7 +152,7 @@ class Model_Covid_Report extends CI_Model {
     public function Get_All_User_Quarantine(){
         $result_count = array( 
 
-            'user_quarantine_detial' => $this->Get_Sum_Status_Yellow_Detail(),
+            'user_quarantine_detial' => $this->Get_Sum_Status_Yellow_Detail("0000"),
             
         );     
 
@@ -504,128 +504,180 @@ class Model_Covid_Report extends CI_Model {
 
    
 
-    // public function fix_cv_user($result){
-        
-    //     // $user_ad_code = $result[0]['user_ad_code'];
-    //     // return $user_ad_code;
-
-    //     // echo sizeof($result);
-
-    //     for ($i=0; $i < sizeof($result); $i++) { 
-         
-          
-    //         $user_ad_code = $result[$i]['user_ad_code'];
-
-    //         // echo $user_ad_code;
-
-    //         $data = $this->db->query("SELECT COUNT(user_ad_code)FROM cv_user WHERE user_ad_code = '$user_ad_code'")->result_array();
-        
-    //         $count = $data[0]["COUNT(user_ad_code)"];
-
-    
-    //         if($count == "0"){
-        
-    //             $user_detail = json_decode($this->Get_user_detail($user_ad_code), true);
-    //             // echo $result['result'];
-        
-    //             $data = array(
-    //                     'user_ad_code' => $user_ad_code, 
-    //                     'user_ad_name' => $user_detail['result']['personal']['PersonalName'],
-    //                     'user_ad_dept_code' => $user_detail['result']['personal']['DepartmentCode'],
-    //                     'user_ad_dept_name' => $user_detail['result']['personal']['Department'],
-    //                     'user_ad_birth_date' => $this->date_thai_to_eng($user_detail['result']['personal']['BirthDate']),
-    //                     'user_ad_sex' => $user_detail['result']['personal']['Sex'],
-    //                     'user_ad_tel' => "",
-    //                     'user_ad_tel_intra' => ""
-    //                 );
-                
-    //             $this->db->insert('cv_user', $data);
-    //             // return $this->Set_self_assessment($result); 
-    //             // return $this->Get_User_case($result);
-    
-    //         }else if($count == "1"){
-    
-                
-    //             $user_detail = json_decode($this->Get_user_detail($user_ad_code), true);
-    //             $data = array(
-    //                 'user_ad_code' => $user_ad_code, 
-    //                 'user_ad_name' => $user_detail['result']['personal']['PersonalName'],
-    //                 'user_ad_dept_code' => $user_detail['result']['personal']['DepartmentCode'],
-    //                 'user_ad_dept_name' => $user_detail['result']['personal']['Department'],
-    //                 'user_ad_birth_date' => $this->date_thai_to_eng($user_detail['result']['personal']['BirthDate']),
-    //                 'user_ad_sex' => $user_detail['result']['personal']['Sex'],
-    //                 'user_ad_tel_intra' => ""
-    //             );
-    
-    //             $this->db->trans_begin();
-    //             $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user');
-                    
-    //             if ($this->db->trans_status() === false) {
-    //                 $this->db->trans_rollback();
-                    
-                
-    //             } else {
-    //                 $this->db->trans_commit();
-    
-
-    //             }
-    //         }
-           
-    //     }
-      
-
-    // }
-          
-    // public function Get_user_detail($user_ad_code){
    
-    //     $ch = curl_init();
-    //     curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_Member/Member_User_Profile_withAD');
-    //     curl_setopt($ch, CURLOPT_POST, true);
-    //     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    //     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( array('user_ad_code' => $user_ad_code)) );
-    //     $result = curl_exec($ch);
-    //     curl_close($ch);
-    //     return  $result;
+    public function Get_All_user_have_covid($data){
+        if(isset($data['dept_code'])){
+            $result_count = array(  'user_have_covid' => $this->Get_user_have_covid_Detail($data['dept_code']), );     
+    
+            $result = array( 
+                'status' => "true",
+                'result' => $result_count
+                 
+            );     
+            
+            return $result;
 
-    // }
+        }else{
 
-    // public function date_thai_to_eng($date){
-    //     $month_name = [
-    //         'มกราคม',
-    //         'กุมภาพันธ์',
-    //         'มีนาคม',
-    //         'เมษายน',
-    //         'พฤษภาคม',
-    //         'มิถุนายน',
-    //         'กรกฎาคม',
-    //         'สิงหาคม',
-    //         'กันยายน',
-    //         'ตุลาคม',
-    //         'พฤศจิกายน',
-    //         'ธันวาคม',
-    //     ];
-    //     $month_num = [
-    //         '01',
-    //         '02',
-    //         '03',
-    //         '04',
-    //         '05',
-    //         '06',
-    //         '07',
-    //         '08',
-    //         '09',
-    //         '10',
-    //         '11',
-    //         '12',
-    //     ];
-
+            $result_count = array(   'user_have_covid' => $this->Get_user_have_covid_Detail("0000"),  );     
+    
+            $result = array( 
+                'status' => "true",
+                'result' => $result_count
+                 
+            );     
+            
+            return $result;
+            
+        }
        
-    //     $date = explode(" ",str_replace($month_name, $month_num, $date));
-    //     $date = ((int)$date[2]-543)."-".$date[1]."-".$date[0];
-    //     return $date;
-    // }
+    }
+
+    public function Get_user_have_covid_Detail($dept_code){
+           
+            if($dept_code == "0000"){
+
+                $dept_query_red = "SELECT DISTINCT user_ad_dept_code 
+                FROM `cv_user_latest_status` 
+                INNER JOIN `cv_user` 
+                ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+                WHERE `cv_user_latest_status`.self_assessment_status_covid = 1";
+
+            }else{
+
+                $dept_query_red = "SELECT DISTINCT user_ad_dept_code 
+                FROM `cv_user_latest_status` 
+                INNER JOIN `cv_user` 
+                ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+                WHERE `cv_user_latest_status`.self_assessment_status_covid = 1
+                AND `cv_user`.`user_ad_dept_code` LIKE '$dept_code%' ";
+            }
+     
+                            
+
+            $result_dept = $this->Get_All_Dept_Name($dept_query_red);
+            $result_dept =  $result_dept['result'];
+
+            for($i=0; $i < sizeof($result_dept); $i++){
+
+                $dept_code = $result_dept[$i]['DEPT_CODE'] ;
+                $dept_code = substr($dept_code, 0 ,-4); 
+
+            
+                $user_result = $this->db
+                    ->query("SELECT * FROM `cv_user_latest_status`
+                        INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
+                        WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
+                        AND `cv_user_latest_status`.self_assessment_status_covid = 1
+                        ")
+                    ->result_array();
+
+                for($index_user_result=0; $index_user_result < sizeof($user_result); $index_user_result++){
+                
+                    $user_ad_code = $user_result[$index_user_result]['user_ad_code'];
+
+            
+                    $user_self_assessment_result = $this->db
+                    ->query("SELECT * FROM `cv_self_assessment`
+                        WHERE `user_ad_code` =  '$user_ad_code'
+                        ORDER BY `self_assessment_id` DESC LIMIT 100")
+                    ->result_array();
+
+                    $user_result[$index_user_result]['user_self_assessment_result'] = $user_self_assessment_result;
+                 
+
+                    for($index_user_self_assessment_result=0; $index_user_self_assessment_result < sizeof($user_self_assessment_result); $index_user_self_assessment_result++){
+                       
+                    
+                     
+                        $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
+                        // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                        
+                        $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
+                        ->query("SELECT *  FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                        ->result_array();
+        
+                        // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                        // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                        // ->result_array();
+
+                        $self_assessment_id  = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_id"];
+
+                        $self_assessment_detail =  $this->db
+                        ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id'")
+                        ->result_array();
+
+                        // print_r( $self_assessment_detail );
+                        if(sizeof($self_assessment_detail) != 0){
+
+                            $self_assessment_detail_result = array(json_decode($self_assessment_detail[0]['self_assessment_detail_result'], true)); 
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = $self_assessment_detail_result;
+
+                        }else{
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = array();
+                        }
+                      
+                        $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
+                    
+                        if($nurse_comment_id != "0"){
+
+                            $nurse_comment_result = $this->db
+                            ->query("SELECT * FROM `cv_nurse_comment` WHERE `nurse_comment_id` =  '$nurse_comment_id'")
+                            ->result_array();
+
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = $nurse_comment_result;
+
+                        }else{
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = array();
+
+                        }
+
+                        $chief_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['chief_approve_id'];
+
+                        if($chief_approve_id != "0"){
+
+                            $chief_approve_result = $this->db
+                            ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
+                            ->result_array();
+
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = $chief_approve_result;
+
+                        }else{
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
+
+                        }
+
+                        $doctor_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['doctor_approve_id'];
+
+                        if($doctor_approve_id != "0"){
+
+                            $doctor_approve_result = $this->db
+                            ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
+                            ->result_array();
+
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = $doctor_approve_result;
+
+                        }else{
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = array();
+
+                        }
+
+                    }
+                  
+
+                }
+                
+                $result_dept[$i]["RESULT_ALL_USER"] = $user_result ;
+
+                $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
+                $result_dept[$i]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
+            }
+
+
+        return $result_dept;
+    }
+
+
 
 
 }

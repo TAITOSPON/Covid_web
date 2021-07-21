@@ -958,6 +958,73 @@ class Model_Covid_User extends CI_Model
     }
 
 
+    public function Update_user_status_covid($result){
+
+        if(isset($result['user_ad_code'])){
+            if(isset($result['user_ad_code_action'])){
+
+                $user_ad_code =  $result['user_ad_code'];
+                $user_ad_code_action = $result['user_ad_code_action'];
+        
+        
+                $data = array(
+                    'self_assessment_status_covid' =>  $result['self_assessment_status_covid'], 
+                );
+        
+              
+                $this->db->trans_begin();
+                $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user_latest_status');
+                    
+                if ($this->db->trans_status() === false) {
+                    $this->db->trans_rollback();
+                    return  array(  'status' => "false" , 'result' => "update self_assessment_status_covid error" );
+                } else {
+                    $this->db->trans_commit();
+
+                    $result['action'] = "Update_user_status_covid";
+                    $this->Insert_user_latest_status_Log($result);
+
+                    return  array(  'status' => "true" , 'result' => $this->User_get_history_all_form($result) );
+
+                   
+                }
+
+
+            }else{
+                return  array(  'status' => "false" , 'result' => "request user_ad_code_action" );
+            }
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
+        }
+
+
+      
+    }
+    public function Insert_user_latest_status_Log($data_){
+        
+        $data_insert = array(
+            'cv_user_latest_status_log_id  '     => NULL,
+            'cv_user_latest_status_log'          => date("Y-m-d H:i:s"),
+            'cv_user_latest_status_log_action'   => $data_['action'],
+            'user_ad_code'                       => $data_['user_ad_code'],
+            'user_ad_code_action'                => $data_['user_ad_code_action'],
+        );
+
+
+        $this->db->insert('cv_user_latest_status_log', $data_insert);
+        if(($this->db->affected_rows() != 1) ? false : true){
+
+            return  array(  'status' => "true" , 'result' => "Insert_user_latest_status_Log true" );
+
+        }else{
+
+            return  array(  'status' => "false" , 'result' => "Insert_user_latest_status_Log false" );
+
+        }
+
+    }
+
+
     public function Get_Sum_Status(){
 
         $query_all = $this->db
@@ -1780,7 +1847,7 @@ class Model_Covid_User extends CI_Model
     public function Alert_text($detail_user,$chief_result,$user_ad_code,$self_assessment_result){
 
         if(sizeof($chief_result) != 0){
-                    
+          
             $user_ad_name = $detail_user[0]['user_ad_name'];
             $user_ad_tel = $detail_user[0]['user_ad_tel'];
             $user_ad_dept_name = $detail_user[0]['user_ad_dept_name'];
@@ -1794,6 +1861,7 @@ class Model_Covid_User extends CI_Model
             //ALERT TO NURSE ============================================================================
             $text_nurse = "แจ้งเตือน คุณพยาบาลและคณะ".
             "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+            "\nรหัสพนักงาน".$user_ad_code.
             "\n".$user_ad_dept_name.
             "\nโทร. ".$user_ad_tel.
             "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";

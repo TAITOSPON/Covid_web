@@ -184,6 +184,14 @@ class Api_Covid_User extends REST_Controller{
 
        }
 
+
+       public function Update_user_status_covid_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->Update_user_status_covid($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
+
+
        // FOR Nurse +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      
 
@@ -247,6 +255,14 @@ class Api_Covid_User extends REST_Controller{
               $result = $this->Model_Covid_Report->Get_All_User_Quarantine();  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
+
+              
+       public function Get_All_user_have_covid_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_Report->Get_All_user_have_covid($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
+
 
 
 
