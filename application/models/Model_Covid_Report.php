@@ -503,6 +503,129 @@ class Model_Covid_Report extends CI_Model {
     }
 
    
+
+    // public function fix_cv_user($result){
+        
+    //     // $user_ad_code = $result[0]['user_ad_code'];
+    //     // return $user_ad_code;
+
+    //     // echo sizeof($result);
+
+    //     for ($i=0; $i < sizeof($result); $i++) { 
+         
           
+    //         $user_ad_code = $result[$i]['user_ad_code'];
+
+    //         // echo $user_ad_code;
+
+    //         $data = $this->db->query("SELECT COUNT(user_ad_code)FROM cv_user WHERE user_ad_code = '$user_ad_code'")->result_array();
+        
+    //         $count = $data[0]["COUNT(user_ad_code)"];
+
+    
+    //         if($count == "0"){
+        
+    //             $user_detail = json_decode($this->Get_user_detail($user_ad_code), true);
+    //             // echo $result['result'];
+        
+    //             $data = array(
+    //                     'user_ad_code' => $user_ad_code, 
+    //                     'user_ad_name' => $user_detail['result']['personal']['PersonalName'],
+    //                     'user_ad_dept_code' => $user_detail['result']['personal']['DepartmentCode'],
+    //                     'user_ad_dept_name' => $user_detail['result']['personal']['Department'],
+    //                     'user_ad_birth_date' => $this->date_thai_to_eng($user_detail['result']['personal']['BirthDate']),
+    //                     'user_ad_sex' => $user_detail['result']['personal']['Sex'],
+    //                     'user_ad_tel' => "",
+    //                     'user_ad_tel_intra' => ""
+    //                 );
+                
+    //             $this->db->insert('cv_user', $data);
+    //             // return $this->Set_self_assessment($result); 
+    //             // return $this->Get_User_case($result);
+    
+    //         }else if($count == "1"){
+    
+                
+    //             $user_detail = json_decode($this->Get_user_detail($user_ad_code), true);
+    //             $data = array(
+    //                 'user_ad_code' => $user_ad_code, 
+    //                 'user_ad_name' => $user_detail['result']['personal']['PersonalName'],
+    //                 'user_ad_dept_code' => $user_detail['result']['personal']['DepartmentCode'],
+    //                 'user_ad_dept_name' => $user_detail['result']['personal']['Department'],
+    //                 'user_ad_birth_date' => $this->date_thai_to_eng($user_detail['result']['personal']['BirthDate']),
+    //                 'user_ad_sex' => $user_detail['result']['personal']['Sex'],
+    //                 'user_ad_tel_intra' => ""
+    //             );
+    
+    //             $this->db->trans_begin();
+    //             $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user');
+                    
+    //             if ($this->db->trans_status() === false) {
+    //                 $this->db->trans_rollback();
+                    
+                
+    //             } else {
+    //                 $this->db->trans_commit();
+    
+
+    //             }
+    //         }
+           
+    //     }
+      
+
+    // }
+          
+    // public function Get_user_detail($user_ad_code){
+   
+    //     $ch = curl_init();
+    //     curl_setopt($ch, CURLOPT_URL, 'https://webhook.toat.co.th/linebot/web/index.php/api/Api_Member/Member_User_Profile_withAD');
+    //     curl_setopt($ch, CURLOPT_POST, true);
+    //     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    //     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode( array('user_ad_code' => $user_ad_code)) );
+    //     $result = curl_exec($ch);
+    //     curl_close($ch);
+    //     return  $result;
+
+    // }
+
+    // public function date_thai_to_eng($date){
+    //     $month_name = [
+    //         'มกราคม',
+    //         'กุมภาพันธ์',
+    //         'มีนาคม',
+    //         'เมษายน',
+    //         'พฤษภาคม',
+    //         'มิถุนายน',
+    //         'กรกฎาคม',
+    //         'สิงหาคม',
+    //         'กันยายน',
+    //         'ตุลาคม',
+    //         'พฤศจิกายน',
+    //         'ธันวาคม',
+    //     ];
+    //     $month_num = [
+    //         '01',
+    //         '02',
+    //         '03',
+    //         '04',
+    //         '05',
+    //         '06',
+    //         '07',
+    //         '08',
+    //         '09',
+    //         '10',
+    //         '11',
+    //         '12',
+    //     ];
+
+       
+    //     $date = explode(" ",str_replace($month_name, $month_num, $date));
+    //     $date = ((int)$date[2]-543)."-".$date[1]."-".$date[0];
+    //     return $date;
+    // }
+
 
 }

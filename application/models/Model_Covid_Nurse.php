@@ -76,20 +76,73 @@ class Model_Covid_Nurse extends CI_Model
  
         $data_DEPT = array();
 
+        $stack = array();
         for($i=0; $i < sizeof($data_DEPT_CODE); $i++){
                 
             // $data_DEPT[$i]['DEPT_CODE'] = $data_DEPT_CODE[$i];   
             // $data_DEPT[$i]['DEPT_NAME'] = $data_DEPT_NAME[$i];   
+        
+            if($data_DEPT_CODE[$i] != "" || $data_DEPT_CODE[$i] != null){
 
-            $data_DEPT[$i]['DEPT_CODE'] = $data_DEPT_CODE[$i];   
-            $data_DEPT[$i]['DEPT_NAME'] = $data_DEPT_CODE[$i];  
+                $data_DEPT[$i]['DEPT_CODE'] = $data_DEPT_CODE[$i];   
+                $data_DEPT[$i]['DEPT_NAME'] = $data_DEPT_CODE[$i];  
+
+                array_push($stack, $data_DEPT[$i]);
+            }
+           
           
         }
-        return array(  'status' => "true" , 'result' => $data_DEPT);
+        return array(  'status' => "true" , 'result' => $stack);
         // print_r($data_DEPT); exit();
         
     }
 
+    public function Nurse_Get_All_dept(){
+        
+
+            $result_dept = $this->Get_All_Dept_Name();
+            print_r($result_dept); exit();
+          
+            $result_dept =  $result_dept['result'];
+        
+            for($i=0; $i < sizeof($result_dept); $i++){
+
+              
+
+                    $dept_code = $result_dept[$i]['DEPT_CODE'] ;
+
+            
+              
+                    $dept_code = substr($dept_code, 0 ,-4); 
+
+            
+                    $result_dept[$i]["RESULT_ALL_USER"] = "" ;
+
+                    $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
+                    $result_dept[$i]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
+
+            
+            }
+
+            $data = array(  'status' => "true" , 'result' => $result_dept);
+
+
+            $stack = array();
+
+            for($j=0; $j < sizeof($result_dept); $j++){
+               
+                if($result_dept[$j]['DEPT_CODE'] != null ){
+                    // unset($data['result'][$j]);
+                    array_push($stack,$data['result'][$j]);
+                }
+
+               
+            }
+
+            return   array(  'status' => "true" , 'result' => $stack); 
+        
+
+    }
 
     public function Nurse_Get_All_User_by_dept_code($result){
 
@@ -342,17 +395,18 @@ class Model_Covid_Nurse extends CI_Model
               
             }
 
-
+            $stack = array();
             $data = array(  'status' => "true" , 'result' => $result_dept);
 
                 for($j=0; $j < sizeof($result_dept); $j++){
                    
-                    if(sizeof( $result_dept[$j]['RESULT_ALL_USER'] ) == 0 ){
-                        unset($data['result'][$j]);
+                    if(sizeof( $result_dept[$j]['RESULT_ALL_USER'] ) != 0 ){
+                        // unset($data['result'][$j]);
+                        array_push($stack,$data['result'][$j]);
                     }
 
                 }
-            return $data ;
+            return   array(  'status' => "true" , 'result' => $stack); 
             // return array(  'status' => "true" , 'result' => $result_dept);
         }else{
             return array(  'status' => "false" , 'result' => "request dept_code");

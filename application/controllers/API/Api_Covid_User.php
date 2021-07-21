@@ -175,6 +175,15 @@ class Api_Covid_User extends REST_Controller{
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
 
+
+       public function Nurse_Get_All_dept_post(){
+
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_Nurse->Nurse_Get_All_dept($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+
+       }
+
        // FOR Nurse +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      
 
@@ -239,4 +248,11 @@ class Api_Covid_User extends REST_Controller{
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
 
+
+
+       // public function fix_cv_user_post(){
+       //        $data = json_decode(file_get_contents('php://input'), true);
+       //        $result = $this->Model_Covid_Report->fix_cv_user($data);  
+       //        echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       // }
 }
