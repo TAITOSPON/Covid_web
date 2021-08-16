@@ -12,7 +12,7 @@ class Model_Covid_Report extends CI_Model {
             ->result_array();
 
         $query_green = $this->db
-            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "1"')
+            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "1" and self_assessment_status_covid IS NULL')
             // ->query('SELECT count(*) FROM `cv_user`')
             ->result_array();
 
@@ -35,22 +35,35 @@ class Model_Covid_Report extends CI_Model {
         // $risk =  ((int)$blue)+((int)$yellow)+((int)$orange)+((int)$red);
 
         $risk = $this->db
-        ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result != "1" and doctor_approve_status_wfh !=1')
-        ->result_array();
+            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result != "1" and doctor_approve_status_wfh !=1 and self_assessment_status_covid IS NULL')
+            ->result_array();
 
 
         
         
         $yellow_user_count = $this->db
-            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE  doctor_approve_status_wfh =1')
+            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE  doctor_approve_status_wfh =1 and self_assessment_status_covid IS NULL')
             ->result_array();
+
+        $have_covid_user_count = $this->db
+            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE  self_assessment_status_covid = 1')
+            ->result_array();
+        
+        $get_well_covid_user_count = $this->db
+            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE  self_assessment_status_covid = 0')
+            ->result_array();
+
       
         $result_count = array( 
             'all_user_count' => $query_all[0]['count(*)'],
             'green_user_count' => $query_green[0]['count(*)'],
             'yellow_user_count' => $yellow_user_count[0]['count(*)'],
             'red_user_count' => $risk[0]['count(*)'],  
+            'have_covid_count' => $have_covid_user_count[0]['count(*)'],
+            'get_well_covid_count' => $get_well_covid_user_count[0]['count(*)'],
         );     
+
+
 
         $result = array( 
             'status' => "true",
@@ -205,7 +218,6 @@ class Model_Covid_Report extends CI_Model {
        
 
     }
-
 
 
     // yellow = กักตัว
@@ -678,6 +690,142 @@ class Model_Covid_Report extends CI_Model {
     }
 
 
+
+    public function Get_dept_heve_covid($data){
+        if(isset($data['dept_code'])){
+            $result_count = array( 
+                    'Get_dept_heve_covid_top_five' => $this->Get_dept_heve_covid_top_five($data['dept_code']),
+                    'Get_dept_get_well_covid_top_five' => $this->Get_dept_get_well_covid_top_five($data['dept_code']),
+                );     
+    
+            $result = array( 
+                'status' => "true",
+                'result' => $result_count
+                 
+            );     
+            
+            return $result;
+
+        }else{
+
+            $result_count = array(   
+                'Get_dept_heve_covid_top_five' => $this->Get_dept_heve_covid_top_five("0000"),
+                'Get_dept_get_well_covid_top_five' => $this->Get_dept_get_well_covid_top_five("0000"),
+            );     
+    
+            $result = array( 
+                'status' => "true",
+                'result' => $result_count
+                 
+            );     
+            
+            return $result;
+            
+        }
+       
+    }
+
+
+    public function Get_dept_heve_covid_top_five($dept_code){
+            if($dept_code == "0000"){
+
+                $dept_query_red = "SELECT DISTINCT user_ad_dept_code 
+                FROM `cv_user_latest_status` 
+                INNER JOIN `cv_user` 
+                ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+                WHERE `cv_user_latest_status`.self_assessment_status_covid = 1 LIMIT 5";
+
+            }else{
+
+                $dept_query_red = "SELECT DISTINCT user_ad_dept_code 
+                FROM `cv_user_latest_status` 
+                INNER JOIN `cv_user` 
+                ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+                WHERE `cv_user_latest_status`.self_assessment_status_covid = 1
+                AND `cv_user`.`user_ad_dept_code` LIKE '$dept_code%'LIMIT 5 ";
+            }
+     
+                            
+
+            $result_dept = $this->Get_All_Dept_Name($dept_query_red);
+            $result_dept =  $result_dept['result'];
+
+            for($i=0; $i < sizeof($result_dept); $i++){
+
+                $dept_code = $result_dept[$i]['DEPT_CODE'] ;
+                $dept_code = substr($dept_code, 0 ,-4); 
+
+            
+                $user_result = $this->db
+                    ->query("SELECT * FROM `cv_user_latest_status`
+                        INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
+                        WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
+                        AND `cv_user_latest_status`.self_assessment_status_covid = 1
+                        ")
+                    ->result_array();
+
+            
+                
+                $result_dept[$i]["RESULT_ALL_USER"] = $user_result ;
+
+                $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
+                $result_dept[$i]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
+            }
+
+
+        return $result_dept;
+    }
+
+
+    public function Get_dept_get_well_covid_top_five($dept_code){
+        if($dept_code == "0000"){
+
+            $dept_query_red = "SELECT DISTINCT user_ad_dept_code 
+            FROM `cv_user_latest_status` 
+            INNER JOIN `cv_user` 
+            ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+            WHERE `cv_user_latest_status`.self_assessment_status_covid = 0 LIMIT 5";
+
+        }else{
+
+            $dept_query_red = "SELECT DISTINCT user_ad_dept_code 
+            FROM `cv_user_latest_status` 
+            INNER JOIN `cv_user` 
+            ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code   
+            WHERE `cv_user_latest_status`.self_assessment_status_covid = 0
+            AND `cv_user`.`user_ad_dept_code` LIKE '$dept_code%'LIMIT 5 ";
+        }
+ 
+                        
+
+        $result_dept = $this->Get_All_Dept_Name($dept_query_red);
+        $result_dept =  $result_dept['result'];
+
+        for($i=0; $i < sizeof($result_dept); $i++){
+
+            $dept_code = $result_dept[$i]['DEPT_CODE'] ;
+            $dept_code = substr($dept_code, 0 ,-4); 
+
+        
+            $user_result = $this->db
+                ->query("SELECT * FROM `cv_user_latest_status`
+                    INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
+                    WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
+                    AND `cv_user_latest_status`.self_assessment_status_covid = 0
+                    ")
+                ->result_array();
+
+        
+            
+            $result_dept[$i]["RESULT_ALL_USER"] = $user_result ;
+
+            $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
+            $result_dept[$i]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
+        }
+
+
+        return $result_dept;
+    }
 
 
 }

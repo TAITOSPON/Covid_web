@@ -14,7 +14,8 @@ class Api_Covid_User extends REST_Controller{
        }
 
        public function index_get(){
-              echo "HI";
+              // $data = array('fghfg',"df","rtgd","dsf");
+              // echo sizeof($data)-1;
        }
 
        // FOR USER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -145,6 +146,12 @@ class Api_Covid_User extends REST_Controller{
               $result = $this->Model_Covid_User->Chief_approve($data);  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
+
+       public function GetDateUserWFHWithUserAD_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->GetDateUserWFHWithUserAD($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
        
        // FOR Chief +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     
@@ -190,6 +197,8 @@ class Api_Covid_User extends REST_Controller{
               $result = $this->Model_Covid_User->Update_user_status_covid($data);  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
+
+  
 
 
        // FOR Nurse +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -241,7 +250,7 @@ class Api_Covid_User extends REST_Controller{
        // FOR REPORT +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
        public function GetSumStatus_get(){
-              $result = $this->Model_Covid_User->Get_Sum_Status();  
+              $result = $this->Model_Covid_Report->Get_Sum_Status();  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
 
@@ -263,12 +272,13 @@ class Api_Covid_User extends REST_Controller{
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
 
+       public function Get_dept_covid_top_five_post(){
+              
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_Report->Get_dept_heve_covid($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
 
 
-
-       // public function fix_cv_user_post(){
-       //        $data = json_decode(file_get_contents('php://input'), true);
-       //        $result = $this->Model_Covid_Report->fix_cv_user($data);  
-       //        echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
-       // }
+      
 }

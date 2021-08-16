@@ -13,17 +13,17 @@ class Model_Covid_User extends CI_Model
         echo $this->db->last_query(); 
         $this->db->delete('cv_user_latest_status', array('user_ad_code' => $user_ad_code)); 
         echo $this->db->last_query(); 
-        $this->db->delete('cv_self_assessment', array('user_ad_code' => $user_ad_code)); 
-        echo $this->db->last_query(); 
-        $this->db->delete('cv_self_assessment_detail', array('user_ad_code' => $user_ad_code)); 
-        echo $this->db->last_query(); 
+        // $this->db->delete('cv_self_assessment', array('user_ad_code' => $user_ad_code)); 
+        // echo $this->db->last_query(); 
+        // $this->db->delete('cv_self_assessment_detail', array('user_ad_code' => $user_ad_code)); 
+        // echo $this->db->last_query(); 
         
-        $this->db->delete('cv_chief_approve', array('user_ad_code' => $user_ad_code)); 
-        echo $this->db->last_query(); 
-        $this->db->delete('cv_doctor_approve', array('user_ad_code' => $user_ad_code)); 
-        echo $this->db->last_query(); 
-        $this->db->delete('cv_nurse_comment', array('user_ad_code' => $user_ad_code)); 
-        echo $this->db->last_query(); 
+        // $this->db->delete('cv_chief_approve', array('user_ad_code' => $user_ad_code)); 
+        // echo $this->db->last_query(); 
+        // $this->db->delete('cv_doctor_approve', array('user_ad_code' => $user_ad_code)); 
+        // echo $this->db->last_query(); 
+        // $this->db->delete('cv_nurse_comment', array('user_ad_code' => $user_ad_code)); 
+        // echo $this->db->last_query(); 
 
         // return  $this->db->last_query(); 
     }
@@ -683,127 +683,183 @@ class Model_Covid_User extends CI_Model
 
                 if(sizeof($latest_status_result) != 0){
             
-                    
-                    $self_assessment_id = $self_assessment_result[0]['self_assessment_id'];
+                    // if($latest_status_result[0]['self_assessment_status_covid'] != "0" ){
+                       
+                        $self_assessment_id = $self_assessment_result[0]['self_assessment_id'];
 
-                    $self_assessment_detail_result = $this->db
-                    ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id' AND user_ad_code = '$user_ad_code'
-                    ORDER BY `cv_self_assessment_detail`.`self_assessment_detail_id` DESC LIMIT 1")
-                    ->result_array();
- 
-                    // print_r($self_assessment_detail_result); exit();
+                        $self_assessment_detail_result = $this->db
+                        ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id' AND user_ad_code = '$user_ad_code'
+                        ORDER BY `cv_self_assessment_detail`.`self_assessment_detail_id` DESC LIMIT 1")
+                        ->result_array();
+     
+                        // print_r($self_assessment_detail_result); exit();
+    
+                        if(sizeof($self_assessment_detail_result) != 0){
+    
+                                // $self_assessment_detail_sum_result = $self_assessment_detail_result
+                                // return $self_assessment_detail_result[0]['self_assessment_detail_result'];
+    
+                                if($self_assessment_result[0]['chief_approve_result_check'] != "1" ){
+    
+    
+                                    if($latest_status_result[0]['doctor_approve_status_wfh'] == "0" ){
+    
+    
+                                        $self_assessment_detail_result = array(json_decode($self_assessment_detail_result[0]['self_assessment_detail_result'], true));
+    
+                                        if($self_assessment_detail_result[0]['self_assessment_detail_sum_result'] == "1"){
+                                        
+                                            return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
 
-                    if(sizeof($self_assessment_detail_result) != 0){
+                                            // $nurse_comment_id = $self_assessment_result[0]['nurse_comment_id'];
+    
+                                            // $nurse_comment_result = $this->db
+                                            // ->query("SELECT * FROM `cv_nurse_comment`WHERE nurse_comment_id = '$nurse_comment_id'")
+                                            // ->result_array();
+                                        
+                                            // if(sizeof($nurse_comment_result) != 0){
+        
+                                            //     $nurse_approve_wfh_date_end = $nurse_comment_result[0]['nurse_approve_wfh_date_end'];
+                                            //     $datenow = date("Y-m-d h:i:s");
+        
+                                            //     if($nurse_approve_wfh_date_end > $datenow){
+                                            //         return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+                                            //     }else{
+                                            //         return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                            //     }
+        
+                                            // }else{
+                                            //     return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                            // }
+    
+                                        }else{
+                                            return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                        }
 
-                            // $self_assessment_detail_sum_result = $self_assessment_detail_result
-                            // return $self_assessment_detail_result[0]['self_assessment_detail_result'];
-
-                            if($self_assessment_result[0]['chief_approve_result_check'] != "1" ){
-
-
-                                if($latest_status_result[0]['doctor_approve_status_wfh'] == "0" ){
-
-
-                                    $self_assessment_detail_result = array(json_decode($self_assessment_detail_result[0]['self_assessment_detail_result'], true));
-
-                                    if($self_assessment_detail_result[0]['self_assessment_detail_sum_result'] == "1"){
-                                    
+                                        // return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                       
+    
+    
+                                    }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "1"){
+    
+                                        $doctor_approve_id = $latest_status_result[0]['doctor_approve_id'];
+    
+                                        $cv_doctor_approve = $this->db
+                                        ->query("SELECT * FROM `cv_doctor_approve`WHERE doctor_approve_id  = '$doctor_approve_id'")
+                                        ->result_array();
+                                       
+                                        if(sizeof($cv_doctor_approve) != 0){
+    
+                                            $doctor_approve_wfh_date_end = $cv_doctor_approve[0]['doctor_approve_wfh_date_end'];
+                                            $datenow = date("Y-m-d h:i:s");
+    
+                                            if($doctor_approve_wfh_date_end > $datenow){
+                                                return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+                                            }else{
+                                                return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                            }
+    
+                                        }else{
+                                            return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                        }
+    
+                                   
+    
+                                    }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "2"){
+                                        return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                    }
+    
+    
+    
+                                }else{
+                                    return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                }
+    
+                        }else{
+    
+                            // print_r($latest_status_result); exit();
+                            if($latest_status_result[0]['self_assessment_sum_result'] == "5"){
+    
+                                if($self_assessment_result[0]['chief_approve_result_check'] != "1" ){
+    
+                                    if($latest_status_result[0]['doctor_approve_status_wfh'] == "0" ){
+    
                                         return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
 
-                                    }else{
-                                        return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
-                                    }
+
+                                        // $nurse_comment_id = $self_assessment_result[0]['nurse_comment_id'];
+    
+                                        // $nurse_comment_result = $this->db
+                                        // ->query("SELECT * FROM `cv_nurse_comment`WHERE nurse_comment_id = '$nurse_comment_id'")
+                                        // ->result_array();
+                                       
+                                        // if(sizeof($nurse_comment_result) != 0){
+    
+                                        //     $nurse_approve_wfh_date_end = $nurse_comment_result[0]['nurse_approve_wfh_date_end'];
+                                        //     $datenow = date("Y-m-d h:i:s");
+    
+                                        //     if($nurse_approve_wfh_date_end > $datenow){
+                                        //         return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+                                        //     }else{
+                                        //         return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                        //     }
+    
+                                        // }else{
+                                        //     return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                        // }
 
 
-                                }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "1"){
-
-                                    $doctor_approve_id = $latest_status_result[0]['doctor_approve_id'];
-
-                                    $cv_doctor_approve = $this->db
-                                    ->query("SELECT * FROM `cv_doctor_approve`WHERE doctor_approve_id  = '$doctor_approve_id'")
-                                    ->result_array();
-                                   
-                                    if(sizeof($cv_doctor_approve) != 0){
-
-                                        $doctor_approve_wfh_date_end = $cv_doctor_approve[0]['doctor_approve_wfh_date_end'];
-                                        $datenow = date("Y-m-d h:i:s");
-
-                                        if($doctor_approve_wfh_date_end > $datenow){
-                                            return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+    
+                                    }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "1"){
+    
+                                        $nurse_comment_id = $self_assessment_result[0]['nurse_comment_id'];
+    
+                                        $nurse_comment_result = $this->db
+                                        ->query("SELECT * FROM `cv_nurse_comment`WHERE nurse_comment_id = '$nurse_comment_id'")
+                                        ->result_array();
+                                       
+                                        if(sizeof($nurse_comment_result) != 0){
+    
+                                            $nurse_approve_wfh_date_end = $nurse_comment_result[0]['nurse_approve_wfh_date_end'];
+                                            $datenow = date("Y-m-d h:i:s");
+    
+                                            if($nurse_approve_wfh_date_end > $datenow){
+                                                return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+                                            }else{
+                                                return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                                            }
+    
                                         }else{
                                             return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                                         }
-
-                                    }else{
-                                        return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
-                                    }
-
-                               
-
-                                }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "2"){
-                                    return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
-                                }
-
-
-
-                            }else{
-                                return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
-                            }
-
-                    }else{
-
-                        // print_r($latest_status_result); exit();
-                        if($latest_status_result[0]['self_assessment_sum_result'] == "5"){
-
-                            if($self_assessment_result[0]['chief_approve_result_check'] != "1" ){
-
-                                if($latest_status_result[0]['doctor_approve_status_wfh'] == "0" ){
-
-                                    return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
-
-                                }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "1"){
-
-                                    $nurse_comment_id = $self_assessment_result[0]['nurse_comment_id'];
-
-                                    $nurse_comment_result = $this->db
-                                    ->query("SELECT * FROM `cv_nurse_comment`WHERE nurse_comment_id = '$nurse_comment_id'")
-                                    ->result_array();
+    
                                    
-                                    if(sizeof($nurse_comment_result) != 0){
-
-                                        $nurse_approve_wfh_date_end = $nurse_comment_result[0]['nurse_approve_wfh_date_end'];
-                                        $datenow = date("Y-m-d h:i:s");
-
-                                        if($nurse_approve_wfh_date_end > $datenow){
-                                            return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
-                                        }else{
-                                            return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
-                                        }
-
-                                    }else{
+    
+                                    }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "2"){
                                         return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                                     }
-
-                               
-
-                                }else if($latest_status_result[0]['doctor_approve_status_wfh'] == "2"){
+    
+    
+                                   
+    
+    
+                                }else{
                                     return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                                 }
-
-
-                               
-
-
+    
+                           
                             }else{
                                 return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
                             }
-
-                       
-                        }else{
-                            return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                        
                         }
+
+                    // }else{
+                    //     return  array(  'status' => "true" , 'result' => array('status'=>"true" , 'self_assessment_id' => "work from 1 normally"));
+                    // }
+
                     
-                    }
+            
 
                                           
 
@@ -962,34 +1018,54 @@ class Model_Covid_User extends CI_Model
 
         if(isset($result['user_ad_code'])){
             if(isset($result['user_ad_code_action'])){
+                if(isset($result['stamptime'])){
 
-                $user_ad_code =  $result['user_ad_code'];
-                $user_ad_code_action = $result['user_ad_code_action'];
+                    $user_ad_code =  $result['user_ad_code'];
+                    $user_ad_code_action = $result['user_ad_code_action'];
+                    $time_stamp_status_check =  $result['stamptime'];
+            
+                    $data = array(
+                        'self_assessment_status_covid' =>  $result['self_assessment_status_covid'], 
+                    );
+
+                    $data_check_update = $this->db->query(" SELECT COUNT(*) FROM `cv_user_latest_status_log` 
+                                                WHERE user_ad_code = '$user_ad_code' 
+                                                AND user_ad_code_action = '$user_ad_code_action'
+                                                AND cv_user_latest_status_log_action 
+                                                LIKE 'Update_user_status_covid%'
+                                                AND time_stamp_status_check = '$time_stamp_status_check'")->result_array();
         
-        
-                $data = array(
-                    'self_assessment_status_covid' =>  $result['self_assessment_status_covid'], 
-                );
-        
-              
-                $this->db->trans_begin();
-                $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user_latest_status');
-                    
-                if ($this->db->trans_status() === false) {
-                    $this->db->trans_rollback();
-                    return  array(  'status' => "false" , 'result' => "update self_assessment_status_covid error" );
-                } else {
-                    $this->db->trans_commit();
+                    $count = $data_check_update[0]["COUNT(*)"];
 
-                    $result['action'] = "Update_user_status_covid";
-                    $this->Insert_user_latest_status_Log($result);
-
-                    return  array(  'status' => "true" , 'result' => $this->User_get_history_all_form($result) );
-
+                    if($count == "0"){
+                     
+                        $this->db->trans_begin();
+                        $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user_latest_status');
+                            
+                        if ($this->db->trans_status() === false) {
+                            $this->db->trans_rollback();
+                            return  array(  'status' => "false" , 'result' => "update self_assessment_status_covid error" );
+                        } else {
+                            $this->db->trans_commit();
+    
+                            $result['action'] = "Update_user_status_covid = ".$result['self_assessment_status_covid'];
+                            $this->Insert_user_latest_status_Log($result);
+    
+                            return  array(  'status' => "true" , 'result' => $this->User_get_history_all_form($result) );
+    
+                        
+                        }
+                    }else{
+                        return  array(  'status' => "true" , 'result' => $this->User_get_history_all_form($result) );
+                    }
                    
+
+
+                 
+
+                }else{
+                    return  array(  'status' => "false" , 'result' => "request stamptime" );
                 }
-
-
             }else{
                 return  array(  'status' => "false" , 'result' => "request user_ad_code_action" );
             }
@@ -1008,6 +1084,7 @@ class Model_Covid_User extends CI_Model
             'cv_user_latest_status_log_action'   => $data_['action'],
             'user_ad_code'                       => $data_['user_ad_code'],
             'user_ad_code_action'                => $data_['user_ad_code_action'],
+            'time_stamp_status_check'            => $data_['stamptime'],
         );
 
 
@@ -1025,64 +1102,7 @@ class Model_Covid_User extends CI_Model
     }
 
 
-    public function Get_Sum_Status(){
-
-        $query_all = $this->db
-            ->query('SELECT count(*) FROM `cv_user_latest_status`')
-            // ->query('SELECT count(*) FROM `cv_user`')
-            ->result_array();
-
-        $query_green = $this->db
-            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "1"')
-            // ->query('SELECT count(*) FROM `cv_user`')
-            ->result_array();
-
-        // $blue = $this->db
-        //     ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "2" and doctor_approve_status_wfh !=1')
-        //     ->result_array();
-
-        // $yellow = $this->db
-        //     ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "3" and doctor_approve_status_wfh !=1')
-        //     ->result_array();
-
-        // $orange = $this->db
-        //     ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "4" and doctor_approve_status_wfh !=1')
-        //     ->result_array();
-
-        // $red = $this->db
-        //     ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result = "5" and doctor_approve_status_wfh !=1')
-        //     ->result_array();
-            
-        // $risk =  ((int)$blue)+((int)$yellow)+((int)$orange)+((int)$red);
-
-        $risk = $this->db
-        ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE self_assessment_sum_result != "1" and doctor_approve_status_wfh !=1')
-        ->result_array();
-
-
-        
-        
-        $yellow_user_count = $this->db
-            ->query('SELECT count(*) FROM `cv_user_latest_status` WHERE  doctor_approve_status_wfh =1')
-            ->result_array();
-      
-        $result_count = array( 
-            'all_user_count' => $query_all[0]['count(*)'],
-            'green_user_count' => $query_green[0]['count(*)'],
-            'yellow_user_count' => $yellow_user_count[0]['count(*)'],
-            'red_user_count' => $risk[0]['count(*)'],  
-        );     
-
-        $result = array( 
-            'status' => "true",
-            'result' => $result_count
-             
-        );     
-        
-
-        return $result;
-    }
-
+ 
 
     public function User_get_history_all_form($result){
         if(isset($result['user_ad_code'])){
@@ -1496,6 +1516,8 @@ class Model_Covid_User extends CI_Model
                         // print_r($this->db->last_query());  exit();
           
             $query_detail = $this->db->query(" SELECT * FROM `cv_self_assessment` where self_assessment_id = '$self_assessment_id'")->result_array();
+
+         
            
             for($i=0; $i < sizeof($query_detail); $i++){
 
@@ -1552,6 +1574,13 @@ class Model_Covid_User extends CI_Model
                 
             }
 
+            $self_assessment_timeline_result = $this->db
+            ->query("SELECT * FROM `cv_self_assessment_timeline` WHERE user_ad_code = '$user_ad_code' AND self_assessment_id = '$self_assessment_id'")
+            ->result_array();
+           
+            for($i=0; $i < sizeof($self_assessment_timeline_result); $i++){
+                $self_assessment_timeline_result[$i]['assessment_timeline_result'] = json_decode($self_assessment_timeline_result[$i]['assessment_timeline_result'],true);
+            }
             
             $data = array( 
                 'chief_result' => array(json_decode($this->Get_id_chief_by_dapt_code($user_ad_code), true)),
@@ -1559,7 +1588,8 @@ class Model_Covid_User extends CI_Model
                 'detail_self_assessment' => $query_detail,
                 'nurse_comment_result' => $nurse_comment_result,
                 'chief_approve_result' => $chief_approve_result,
-                'doctor_approve_result' => $doctor_approve_result
+                'doctor_approve_result' => $doctor_approve_result,
+                'self_assessment_timeline_result' => $self_assessment_timeline_result
                 
             );     
 
@@ -1789,6 +1819,45 @@ class Model_Covid_User extends CI_Model
 
     }
 
+    public function GetDateUserWFHWithUserAD($result){
+        if(isset($result['user_ad_code'])){
+            $user_ad_code = $result['user_ad_code'];
+
+            $get_cv_user_latest_status = $this->db
+            ->query(" SELECT * FROM `cv_user_latest_status` WHERE doctor_approve_result_check = 1  AND doctor_approve_status_wfh = 1 AND user_ad_code =  '$user_ad_code' ")
+            ->result_array();
+
+            if(sizeof( $get_cv_user_latest_status) != 0){
+                
+                $doctor_approve_id = $get_cv_user_latest_status[0]['doctor_approve_id'];
+                $get_doctor_approve =  $this->db
+                ->query("SELECT * FROM `cv_doctor_approve` WHERE doctor_approve_id = '$doctor_approve_id' ")
+                ->result_array();
+
+                if(sizeof( $get_cv_user_latest_status) != 0){
+                    $data_date_wfh = array (
+                        "ID" => $get_doctor_approve[0]['doctor_approve_id'], 
+                        "WFH_ST_DATE" =>  $get_doctor_approve[0]['doctor_approve_wfh_date_start'],
+                        "WFH_ED_DATE" => $get_doctor_approve[0]['doctor_approve_wfh_date_end'], 
+                        "WFH_EN_NUMBER" => $result['user_ad_code'], 
+                        "create_date" => $get_doctor_approve[0]['doctor_approve_datetime_create'] 
+                    );
+
+                    return $data_date_wfh;
+                }else{
+                    return null;
+                }
+
+            }else{
+                return null;
+            }
+
+
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
+        }
+    }
+
 
     public function Get_Boss_by_ad($result){
 
@@ -1861,7 +1930,7 @@ class Model_Covid_User extends CI_Model
             //ALERT TO NURSE ============================================================================
             $text_nurse = "แจ้งเตือน คุณพยาบาลและคณะ".
             "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
-            "\nรหัสพนักงาน".$user_ad_code.
+            "\nรหัสพนักงาน ".$user_ad_code.
             "\n".$user_ad_dept_name.
             "\nโทร. ".$user_ad_tel.
             "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
@@ -1882,6 +1951,7 @@ class Model_Covid_User extends CI_Model
                     
                     $text = "แจ้งเตือน ".$user_ad_id_recrive_name.
                     "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+                    "\nรหัสพนักงาน ".$user_ad_code.
                     "\n".$user_ad_dept_name.
                     "\nโทร. ".$user_ad_tel.
                     "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจาก\n".$url."\n\nหรือจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
@@ -1918,6 +1988,7 @@ class Model_Covid_User extends CI_Model
                 $text = "แจ้งเตือน ".$user_ad_id_recrive_name.
                 "\n".$user_ad_id_recrive_dept_name.
                 "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+                "\nรหัสพนักงาน ".$user_ad_code.
                 "\n".$user_ad_dept_name.
                 "\nโทร. ".$user_ad_tel.
                 "\n\nเข้าเกณฑ์มีความเสี่ยง \nกรุณาตรวจสอบข้อมูลจาก\n".$url."\n\nหรือจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
@@ -1984,6 +2055,7 @@ class Model_Covid_User extends CI_Model
     
         $text_nurse = "แจ้งเตือน คุณหมอ".
         "\n\nผลการประเมิน Covid-19 \nของ ".$user_ad_name.
+        "\nรหัสพนักงาน ".$user_ad_code.
         "\n".$user_ad_dept_name.
         "\nโทร. ".$user_ad_tel.
         "\n\nเข้าเกณฑ์มีความเสี่ยง \nยืนยันข้อมูลจาก ".$chief_approve_name."\n".$chief_approve_dept_name."\n\nกรุณาตรวจสอบข้อมูลจากเว็บไซต์\nhttps://change.toat.co.th/covid19/index.php\n";
@@ -2010,6 +2082,8 @@ class Model_Covid_User extends CI_Model
         curl_close($ch);
         return  $result;
     }
+
+
 
 
 
