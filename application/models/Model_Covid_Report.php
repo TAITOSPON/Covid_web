@@ -162,18 +162,39 @@ class Model_Covid_Report extends CI_Model {
 
 
 
-    public function Get_All_User_Quarantine(){
-        $result_count = array( 
+    public function Get_All_User_Quarantine($data ){
 
-            'user_quarantine_detial' => $this->Get_Sum_Status_Yellow_Detail("0000"),
-            
-        );     
+        if(isset($data['dept_code'])){
 
-        $result = array( 
-            'status' => "true",
-            'result' => $result_count
-             
-        );     
+            $dept_code = $data['dept_code'];
+            $result_count = array( 
+
+                'user_quarantine_detial' => $this->Get_Sum_Status_Yellow_Detail($dept_code),
+                
+            );     
+    
+            $result = array( 
+                'status' => "true",
+                'result' => $result_count
+                 
+            );     
+
+        }else{
+
+            $result_count = array( 
+
+                'user_quarantine_detial' => $this->Get_Sum_Status_Yellow_Detail("0000"),
+                
+            );     
+    
+            $result = array( 
+                'status' => "true",
+                'result' => $result_count
+                 
+            );     
+
+        }
+       
         
 
         return $result;
