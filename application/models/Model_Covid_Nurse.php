@@ -147,161 +147,39 @@ class Model_Covid_Nurse extends CI_Model
     public function Nurse_Get_All_User_by_dept_code($result){
 
         if(isset($result['dept_code'])){
+
             $dept_code = $result['dept_code'];
 
-            if($dept_code == "0000"){
-                $result_dept = $this->Get_All_Dept_Name();
-                // print_r($result_dept); exit();
-                $result_dept =  $result_dept['result'];
-            
-                for($i=0; $i < sizeof($result_dept); $i++){
-    
-                    $dept_code = $result_dept[$i]['DEPT_CODE'] ;
-                    $dept_code = substr($dept_code, 0 ,-4); 
-    
-                
-                    $user_result = $this->db
-                        ->query("SELECT * FROM `cv_user_latest_status`
-                            INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
-                            WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
-                        
-                            AND `cv_user_latest_status`.`self_assessment_sum_result` !=1
-                            -- AND `cv_user_latest_status`.`self_assessment_sum_result` !=2
+            $checkCheckDeputyGovernor = $this->CheckDeputyGovernor($dept_code);
 
-                            ")
-                        ->result_array();
-                            // print_r($this->db->last_query());  exit();
-                    // print_r($); exit();
-                    for($index_user_result=0; $index_user_result < sizeof($user_result); $index_user_result++){
-                    
-                        $user_ad_code = $user_result[$index_user_result]['user_ad_code'];
-    
-                
-                        $user_self_assessment_result = $this->db
-                        ->query("SELECT * FROM `cv_self_assessment`
-                            WHERE `user_ad_code` =  '$user_ad_code'
-                            ORDER BY `self_assessment_id` DESC LIMIT 100")
-                        ->result_array();
+            if( $checkCheckDeputyGovernor == "true"){
 
-                        $user_result[$index_user_result]['user_self_assessment_result'] = $user_self_assessment_result;
-                     
-
-                        for($index_user_self_assessment_result=0; $index_user_self_assessment_result < sizeof($user_self_assessment_result); $index_user_self_assessment_result++){
-                           
-                        
-                         
-                            $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
-                            // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
-                            
-                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
-                            ->query("SELECT *  FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
-                            ->result_array();
-            
-                            // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
-                            // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
-                            // ->result_array();
-
-                            $self_assessment_id  = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_id"];
-
-                            $self_assessment_detail =  $this->db
-                            ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id'")
-                            ->result_array();
-
-                            // print_r( $self_assessment_detail );
-                            if(sizeof($self_assessment_detail) != 0){
-
-                                $self_assessment_detail_result = array(json_decode($self_assessment_detail[0]['self_assessment_detail_result'], true)); 
-                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = $self_assessment_detail_result;
-
-                            }else{
-                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = array();
-                            }
-                          
-                            $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
-                        
-                            if($nurse_comment_id != "0"){
-
-                                $nurse_comment_result = $this->db
-                                ->query("SELECT * FROM `cv_nurse_comment` WHERE `nurse_comment_id` =  '$nurse_comment_id'")
-                                ->result_array();
-
-                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = $nurse_comment_result;
-
-                            }else{
-                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = array();
-
-                            }
-
-                            $chief_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['chief_approve_id'];
-
-                            if($chief_approve_id != "0"){
-
-                                $chief_approve_result = $this->db
-                                ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
-                                ->result_array();
-
-                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = $chief_approve_result;
-
-                            }else{
-                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
-
-                            }
-
-                            $doctor_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['doctor_approve_id'];
-
-                            if($doctor_approve_id != "0"){
-
-                                $doctor_approve_result = $this->db
-                                ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
-                                ->result_array();
-
-                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = $doctor_approve_result;
-
-                            }else{
-                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = array();
-
-                            }
-
-                        }
-                      
-
-                    }
-                    
-                    $result_dept[$i]["RESULT_ALL_USER"] = $user_result ;
-
-                    $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
-                    $result_dept[$i]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
-                }
-
-
-
-
-    
-            }else{
-
-                $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
-                // $result_dept[]
-                $result_dept[0]['DEPT_CODE'] =  $result_dept_[0]['DEPT_CODE'];
-                $result_dept[0]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
-
-                $dept_code = $result_dept[0]['DEPT_CODE'] ;
-                $dept_code = substr($dept_code, 0 ,-4); 
-    
-                $user_result = $this->db
-                ->query("SELECT * FROM `cv_user_latest_status`
-                    INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
-                    WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
-             
-                        -- AND `cv_user_latest_status`.`self_assessment_sum_result` !=1
-                    ")
+                $user_result_form_boss = $this->db
+                ->query(" SELECT * FROM `cv_member_rule` WHERE member_ad_boss =  '$dept_code'   OR user_ad_code =  '$dept_code'")
                 ->result_array();
 
+           
 
+                $user_result = array();
+                for($index_user_result_form_boss=0; $index_user_result_form_boss < sizeof($user_result_form_boss); $index_user_result_form_boss++){
+                
+                    $user_ad_code_ = $user_result_form_boss[$index_user_result_form_boss]['user_ad_code'];
+
+                    $user_result_by_user_ad_code = $this->db
+                                ->query("SELECT * FROM `cv_user_latest_status`
+                                INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
+                                WHERE  `cv_user`.user_ad_code = '$user_ad_code_' ")
+                                ->result_array();
+
+                                array_push( $user_result, $user_result_by_user_ad_code[0]);
+            
+                }
+                
                 for($index_user_result=0; $index_user_result < sizeof($user_result); $index_user_result++){
-                    
+                        
                     $user_ad_code = $user_result[$index_user_result]['user_ad_code'];
 
-                   
+                
                     $user_self_assessment_result= $this->db  
                     ->query("SELECT * FROM `cv_self_assessment`
                         WHERE `user_ad_code` =  '$user_ad_code'
@@ -390,29 +268,315 @@ class Model_Covid_Nurse extends CI_Model
                     }
                 }
 
-                // return array(  'status' => "true" , 'result' => $user_result);
+                $result_dept[0]['DEPT_CODE'] = $dept_code;
+                $result_dept[0]['DEPT_NAME'] = $user_result_form_boss[0]['member_name_boss'];
                 $result_dept[0]['RESULT_ALL_USER'] = $user_result;
-              
-            }
 
-            $stack = array();
-            $data = array(  'status' => "true" , 'result' => $result_dept);
+                $stack = array();
+                $data = array(  'status' => "true" , 'result' => $result_dept);
 
-                for($j=0; $j < sizeof($result_dept); $j++){
-                   
-                    if(sizeof( $result_dept[$j]['RESULT_ALL_USER'] ) != 0 ){
-                        // unset($data['result'][$j]);
-                        array_push($stack,$data['result'][$j]);
+                    for($j=0; $j < sizeof($result_dept); $j++){
+                    
+                        if(sizeof( $result_dept[$j]['RESULT_ALL_USER'] ) != 0 ){
+                            // unset($data['result'][$j]);
+                            array_push($stack,$data['result'][$j]);
+                        }
+
+                    }
+                return   array(  'status' => "true" , 'result' => $stack); 
+
+                // return   array(  'status' => "true" , 'result' => $user_result); 
+
+            }else if( $checkCheckDeputyGovernor == "false" ){
+
+           
+
+                if($dept_code == "0000"){
+                    $result_dept = $this->Get_All_Dept_Name();
+                    // print_r($result_dept); exit();
+                    $result_dept =  $result_dept['result'];
+                
+                    for($i=0; $i < sizeof($result_dept); $i++){
+        
+                        $dept_code = $result_dept[$i]['DEPT_CODE'] ;
+                        $dept_code = substr($dept_code, 0 ,-4); 
+        
+                    
+                        $user_result = $this->db
+                            ->query("SELECT * FROM `cv_user_latest_status`
+                                INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
+                                WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
+                            
+                                AND `cv_user_latest_status`.`self_assessment_sum_result` !=1
+                                -- AND `cv_user_latest_status`.`self_assessment_sum_result` !=2
+
+                                ")
+                            ->result_array();
+                                // print_r($this->db->last_query());  exit();
+                        // print_r($); exit();
+                        for($index_user_result=0; $index_user_result < sizeof($user_result); $index_user_result++){
+                        
+                            $user_ad_code = $user_result[$index_user_result]['user_ad_code'];
+        
+                    
+                            $user_self_assessment_result = $this->db
+                            ->query("SELECT * FROM `cv_self_assessment`
+                                WHERE `user_ad_code` =  '$user_ad_code'
+                                ORDER BY `self_assessment_id` DESC LIMIT 100")
+                            ->result_array();
+
+                            $user_result[$index_user_result]['user_self_assessment_result'] = $user_self_assessment_result;
+                        
+
+                            for($index_user_self_assessment_result=0; $index_user_self_assessment_result < sizeof($user_self_assessment_result); $index_user_self_assessment_result++){
+                            
+                            
+                            
+                                $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
+                                // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                                
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
+                                ->query("SELECT *  FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                                ->result_array();
+                
+                                // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                                // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                                // ->result_array();
+
+                                $self_assessment_id  = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_id"];
+
+                                $self_assessment_detail =  $this->db
+                                ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id'")
+                                ->result_array();
+
+                                // print_r( $self_assessment_detail );
+                                if(sizeof($self_assessment_detail) != 0){
+
+                                    $self_assessment_detail_result = array(json_decode($self_assessment_detail[0]['self_assessment_detail_result'], true)); 
+                                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = $self_assessment_detail_result;
+
+                                }else{
+                                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = array();
+                                }
+                            
+                                $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
+                            
+                                if($nurse_comment_id != "0"){
+
+                                    $nurse_comment_result = $this->db
+                                    ->query("SELECT * FROM `cv_nurse_comment` WHERE `nurse_comment_id` =  '$nurse_comment_id'")
+                                    ->result_array();
+
+                                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = $nurse_comment_result;
+
+                                }else{
+                                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = array();
+
+                                }
+
+                                $chief_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['chief_approve_id'];
+
+                                if($chief_approve_id != "0"){
+
+                                    $chief_approve_result = $this->db
+                                    ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
+                                    ->result_array();
+
+                                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = $chief_approve_result;
+
+                                }else{
+                                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
+
+                                }
+
+                                $doctor_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['doctor_approve_id'];
+
+                                if($doctor_approve_id != "0"){
+
+                                    $doctor_approve_result = $this->db
+                                    ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
+                                    ->result_array();
+
+                                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = $doctor_approve_result;
+
+                                }else{
+                                    $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = array();
+
+                                }
+
+                            }
+                        
+
+                        }
+                        
+                        $result_dept[$i]["RESULT_ALL_USER"] = $user_result ;
+
+                        $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
+                        $result_dept[$i]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
                     }
 
+
+
+
+        
+                }else{
+
+                    $result_dept_ = array(json_decode($this->Get_id_chief_by_dapt_code($dept_code), true));
+                    // $result_dept[]
+                    $result_dept[0]['DEPT_CODE'] =  $result_dept_[0]['DEPT_CODE'];
+                    $result_dept[0]['DEPT_NAME'] =  $result_dept_[0]['DEPT_NAME'];
+
+                    $dept_code = $result_dept[0]['DEPT_CODE'] ;
+                    $dept_code = substr($dept_code, 0 ,-4); 
+        
+                    $user_result = $this->db
+                    ->query("SELECT * FROM `cv_user_latest_status`
+                        INNER JOIN `cv_user` ON `cv_user`.user_ad_code = `cv_user_latest_status`.user_ad_code  
+                        WHERE `cv_user`.user_ad_dept_code  LIKE '$dept_code%'
+                
+                            -- AND `cv_user_latest_status`.`self_assessment_sum_result` !=1
+                        ")
+                    ->result_array();
+
+
+                    for($index_user_result=0; $index_user_result < sizeof($user_result); $index_user_result++){
+                        
+                        $user_ad_code = $user_result[$index_user_result]['user_ad_code'];
+
+                    
+                        $user_self_assessment_result= $this->db  
+                        ->query("SELECT * FROM `cv_self_assessment`
+                            WHERE `user_ad_code` =  '$user_ad_code'
+                            ORDER BY `self_assessment_id` DESC LIMIT 100")
+                        ->result_array();
+
+                        $user_result[$index_user_result]['user_self_assessment_result'] = $user_self_assessment_result;
+                        
+                        
+                        for($index_user_self_assessment_result=0; $index_user_self_assessment_result < sizeof($user_self_assessment_result); $index_user_self_assessment_result++){
+
+
+                            $self_assessment_result = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result"];
+                            // $self_assessment_result_specific = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_result_specific"];
+                            
+                            $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextNormal'] = $this->db
+                            ->query("SELECT *  FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result'")
+                            ->result_array();
+            
+                            // $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_TextSpecific'] = $this->db
+                            // ->query("SELECT `self_assessment_criterion_data` FROM `cv_self_assessment_criterion` WHERE `self_assessment_criterion_id` = '$self_assessment_result_specific'")
+                            // ->result_array();
+
+                            $self_assessment_id  = $user_self_assessment_result[$index_user_self_assessment_result]["self_assessment_id"];
+
+                            $self_assessment_detail =  $this->db
+                            ->query("SELECT * FROM `cv_self_assessment_detail` WHERE self_assessment_id = '$self_assessment_id'")
+                            ->result_array();
+
+                            // print_r( $self_assessment_detail );
+                            if(sizeof($self_assessment_detail) != 0){
+
+                                $self_assessment_detail_result = array(json_decode($self_assessment_detail[0]['self_assessment_detail_result'], true)); 
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = $self_assessment_detail_result;
+
+                            }else{
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['self_assessment_detail'] = array();
+                            }
+                            
+                            $nurse_comment_id = $user_self_assessment_result[$index_user_self_assessment_result]['nurse_comment_id'];
+                        
+                            if($nurse_comment_id != "0"){
+
+                                $nurse_comment_result = $this->db
+                                ->query("SELECT * FROM `cv_nurse_comment` WHERE `nurse_comment_id` =  '$nurse_comment_id'")
+                                ->result_array();
+
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = $nurse_comment_result;
+
+                            }else{
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['nurse_comment_result'] = array();
+
+                            }
+
+
+                            $chief_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['chief_approve_id'];
+
+                            if($chief_approve_id != "0"){
+
+                                $chief_approve_result = $this->db
+                                ->query("SELECT * FROM `cv_chief_approve` WHERE `chief_approve_id` =  '$chief_approve_id'")
+                                ->result_array();
+
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = $chief_approve_result;
+
+                            }else{
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['chief_approve_result'] = array();
+
+                            }
+
+                            $doctor_approve_id = $user_self_assessment_result[$index_user_self_assessment_result]['doctor_approve_id'];
+
+                            if($doctor_approve_id != "0"){
+
+                                $doctor_approve_result = $this->db
+                                ->query("SELECT * FROM `cv_doctor_approve` WHERE `doctor_approve_id` =  '$doctor_approve_id'")
+                                ->result_array();
+
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = $doctor_approve_result;
+
+                            }else{
+                                $user_result[$index_user_result]['user_self_assessment_result'][$index_user_self_assessment_result]['doctor_approve_result'] = array();
+
+                            }
+
+                        }
+                    }
+
+                    // return array(  'status' => "true" , 'result' => $user_result);
+                    $result_dept[0]['RESULT_ALL_USER'] = $user_result;
+                
                 }
-            return   array(  'status' => "true" , 'result' => $stack); 
-            // return array(  'status' => "true" , 'result' => $result_dept);
+
+                $stack = array();
+                $data = array(  'status' => "true" , 'result' => $result_dept);
+
+                    for($j=0; $j < sizeof($result_dept); $j++){
+                    
+                        if(sizeof( $result_dept[$j]['RESULT_ALL_USER'] ) != 0 ){
+                            // unset($data['result'][$j]);
+                            array_push($stack,$data['result'][$j]);
+                        }
+
+                    }
+                return   array(  'status' => "true" , 'result' => $stack); 
+
+            }
+
         }else{
             return array(  'status' => "false" , 'result' => "request dept_code");
         }
 
     }
+
+    public function CheckDeputyGovernor($dept_code){
+
+        if($dept_code == "001339"){
+            return "true";
+        }else if($dept_code == "002613"	){
+            return "true";
+        }else if($dept_code == "000942"	){
+            return "true";
+        }else if($dept_code == "001582"	){
+            return "true";
+        }else if($dept_code == "000964"	){
+            return "true";
+        }else{
+            return "false";
+        }
+
+    }
+
+
 
     public function Nurse_Comment_user_with_self_assessment_id($result){
         if(isset($result['nurse_comment_ad_id'])){

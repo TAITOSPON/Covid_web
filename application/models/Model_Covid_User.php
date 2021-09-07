@@ -6,113 +6,120 @@ class Model_Covid_User extends CI_Model
 
 
     public function Clear_data($result){
+        if(isset($result['user_ad_code'])){
+            $user_ad_code = $result['user_ad_code'];
 
-        $user_ad_code = $result['user_ad_code'];
 
-        // $this->db->delete('cv_user_policy', array('user_ad_code' => $user_ad_code)); 
-        // echo $this->db->last_query(); 
-        // $this->db->delete('cv_user_latest_status', array('user_ad_code' => $user_ad_code)); 
-        // echo $this->db->last_query(); 
-        
-        // $this->db->delete('cv_self_assessment', array('user_ad_code' => $user_ad_code)); 
-        // echo $this->db->last_query(); 
-        // $this->db->delete('cv_self_assessment_detail', array('user_ad_code' => $user_ad_code)); 
-        // echo $this->db->last_query(); 
-        
-        // $this->db->delete('cv_chief_approve', array('user_ad_code' => $user_ad_code)); 
-        // echo $this->db->last_query(); 
-        // $this->db->delete('cv_doctor_approve', array('user_ad_code' => $user_ad_code)); 
-        // echo $this->db->last_query(); 
-        // $this->db->delete('cv_nurse_comment', array('user_ad_code' => $user_ad_code)); 
-        // echo $this->db->last_query(); 
-
-        // return  $this->db->last_query(); 
-
-       
-
-        $data = $this->db->query("SELECT COUNT(user_ad_code)FROM cv_user_latest_status WHERE user_ad_code = '$user_ad_code'")->result_array();
-        
-        $count = $data[0]["COUNT(user_ad_code)"];
-
-        
-        if($count == "0"){
-
-            $data = array(
-                "user_ad_code"  => $user_ad_code,
-                "self_assessment_result"  => "11",
-                "self_assessment_colorNormal" => "success",
-                "self_assessment_result_specific" => "0",
-                "self_assessment_colorSpecific" => "",
-                "self_assessment_sum_result" => "1",
-                "self_assessment_sum_color" => "success",
-                "chief_approve_result_check" => "0",
-                "chief_approve_id" => "0",
-                "doctor_approve_result_check" => "0",
-                "doctor_approve_id" => "0",
-                "doctor_approve_status_wfh" => "0",
-             
-            );
+            $this->db->delete('cv_user_policy', array('user_ad_code' => $user_ad_code)); 
+            // echo $this->db->last_query(); 
+            $this->db->delete('cv_user_latest_status', array('user_ad_code' => $user_ad_code)); 
+            // echo $this->db->last_query(); 
+            
+            return  array(  'status' => "true" , 'result' => "Clear_data true" );
     
-            $this->db->insert('cv_user_latest_status', $data);
-            if(($this->db->affected_rows() != 1) ? false : true){
-     
-                $data_insert_status_Log = array(
-                    'action'               => "Clear_data_manual (Clear_data insert)",
-                    'user_ad_code'         => $user_ad_code,
-                    'user_ad_code_action'  => "DEV",
-                    'stamptime'            => date("YmdHis"),
-                );
-                $this->Insert_user_latest_status_Log($data_insert_status_Log);
-                return  array(  'status' => "true" , 'result' => "Clear_data insert true" );
-                                                                
-            }
-
-        }else if($count == "1"){
-
-      
-         
-            $data = array(
-                "self_assessment_result"  => "11",
-                "self_assessment_colorNormal" => "success",
-                "self_assessment_result_specific" => "0",
-                "self_assessment_colorSpecific" => "",
-                "self_assessment_sum_result" => "1",
-                "self_assessment_sum_color" => "success",
-                "chief_approve_result_check" => "0",
-                "chief_approve_id" => "0",
-                "doctor_approve_result_check" => "0",
-                "doctor_approve_id" => "0",
-                "doctor_approve_status_wfh" => "0",
-             
-            );
-
-
-
-
-            $this->db->trans_begin();
-            $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user_latest_status');
-                
-            if ($this->db->trans_status() === false) {
-                $this->db->trans_rollback();
-          
-            } else {
-                $this->db->trans_commit();
-             
-                $data_insert_status_Log = array(
-                    'action'               => "Clear_data_manual (Clear_data Update)",
-                    'user_ad_code'         => $user_ad_code,
-                    'user_ad_code_action'  => "DEV",
-                    'stamptime'            => date("YmdHis"),
-                );
-                $this->Insert_user_latest_status_Log($data_insert_status_Log);
-
-                return  array(  'status' => "true" , 'result' => "Clear_data Update true" );
+            // $this->db->delete('cv_self_assessment', array('user_ad_code' => $user_ad_code)); 
+            // echo $this->db->last_query(); 
+            // $this->db->delete('cv_self_assessment_detail', array('user_ad_code' => $user_ad_code)); 
+            // echo $this->db->last_query(); 
+            
+            // $this->db->delete('cv_chief_approve', array('user_ad_code' => $user_ad_code)); 
+            // echo $this->db->last_query(); 
+            // $this->db->delete('cv_doctor_approve', array('user_ad_code' => $user_ad_code)); 
+            // echo $this->db->last_query(); 
+            // $this->db->delete('cv_nurse_comment', array('user_ad_code' => $user_ad_code)); 
+            // echo $this->db->last_query(); 
+    
+            // return  $this->db->last_query(); 
+    
+           
+    
+            // $data = $this->db->query("SELECT COUNT(user_ad_code)FROM cv_user_latest_status WHERE user_ad_code = '$user_ad_code'")->result_array();
+            
+            // $count = $data[0]["COUNT(user_ad_code)"];
+    
+            
+            // if($count == "0"){
+    
+            //     $data = array(
+            //         "user_ad_code"  => $user_ad_code,
+            //         "self_assessment_result"  => "11",
+            //         "self_assessment_colorNormal" => "success",
+            //         "self_assessment_result_specific" => "0",
+            //         "self_assessment_colorSpecific" => "",
+            //         "self_assessment_sum_result" => "1",
+            //         "self_assessment_sum_color" => "success",
+            //         "chief_approve_result_check" => "0",
+            //         "chief_approve_id" => "0",
+            //         "doctor_approve_result_check" => "0",
+            //         "doctor_approve_id" => "0",
+            //         "doctor_approve_status_wfh" => "0",
+                 
+            //     );
         
-            }
+            //     $this->db->insert('cv_user_latest_status', $data);
+            //     if(($this->db->affected_rows() != 1) ? false : true){
+         
+            //         $data_insert_status_Log = array(
+            //             'action'               => "Clear_data_manual (Clear_data insert)",
+            //             'user_ad_code'         => $user_ad_code,
+            //             'user_ad_code_action'  => "DEV",
+            //             'stamptime'            => date("YmdHis"),
+            //         );
+            //         $this->Insert_user_latest_status_Log($data_insert_status_Log);
+            //         return  array(  'status' => "true" , 'result' => "Clear_data insert true" );
+                                                                    
+            //     }
+    
+            // }else if($count == "1"){
+    
+          
+             
+            //     $data = array(
+            //         "self_assessment_result"  => "11",
+            //         "self_assessment_colorNormal" => "success",
+            //         "self_assessment_result_specific" => "0",
+            //         "self_assessment_colorSpecific" => "",
+            //         "self_assessment_sum_result" => "1",
+            //         "self_assessment_sum_color" => "success",
+            //         "chief_approve_result_check" => "0",
+            //         "chief_approve_id" => "0",
+            //         "doctor_approve_result_check" => "0",
+            //         "doctor_approve_id" => "0",
+            //         "doctor_approve_status_wfh" => "0",
+                 
+            //     );
+    
+    
+    
+    
+            //     $this->db->trans_begin();
+            //     $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user_latest_status');
+                    
+            //     if ($this->db->trans_status() === false) {
+            //         $this->db->trans_rollback();
+              
+            //     } else {
+            //         $this->db->trans_commit();
+                 
+            //         $data_insert_status_Log = array(
+            //             'action'               => "Clear_data_manual (Clear_data Update)",
+            //             'user_ad_code'         => $user_ad_code,
+            //             'user_ad_code_action'  => "DEV",
+            //             'stamptime'            => date("YmdHis"),
+            //         );
+            //         $this->Insert_user_latest_status_Log($data_insert_status_Log);
+    
+            //         return  array(  'status' => "true" , 'result' => "Clear_data Update true" );
+            
+            //     }
+            // }
+    
+         
+    
+        }else{
+            return  array(  'status' => "false" , 'result' => "request user_ad_code" );
         }
-
-     
-
+      
 
     }
 
