@@ -1094,6 +1094,38 @@ class Model_Covid_User extends CI_Model
             }
 
 
+            if($detail_user[0]['doctor_approve_status_wfh'] == "1"){
+    
+                $doctor_approve_id = $detail_user[0]['doctor_approve_id'];
+
+                $cv_doctor_approve = $this->db
+                ->query("SELECT * FROM `cv_doctor_approve`WHERE doctor_approve_id  = '$doctor_approve_id'")
+                ->result_array();
+               
+                if(sizeof($cv_doctor_approve) != 0){
+
+                    $doctor_approve_wfh_date_end = $cv_doctor_approve[0]['doctor_approve_wfh_date_end'];
+                    $datenow = date("Y-m-d h:i:s");
+
+                    if($doctor_approve_wfh_date_end > $datenow){
+                        // return  array(  'status' => "true" , 'result' => array( 'status'=>"false" ,  'self_assessment_id' => $self_assessment_id  ));
+                    }else{
+                        $data['chief_approve_result_check'] = "0";
+                        $data['chief_approve_id'] = "0";
+                        $data['doctor_approve_result_check'] = "0";
+                        $data['doctor_approve_id'] = "0";
+                        $data['doctor_approve_status_wfh'] = "0";
+                    }
+
+                }else{
+                    $data['chief_approve_result_check'] = "0";
+                    $data['chief_approve_id'] = "0";
+                    $data['doctor_approve_result_check'] = "0";
+                    $data['doctor_approve_id'] = "0";
+                    $data['doctor_approve_status_wfh'] = "0";
+                }
+            }
+
 
             $this->db->trans_begin();
             $this->db->where('user_ad_code', $user_ad_code)->set($data)->update('cv_user_latest_status');
