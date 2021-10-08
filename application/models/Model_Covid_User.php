@@ -1988,6 +1988,46 @@ class Model_Covid_User extends CI_Model
         }
     }
 
+    public function GetDateUserWFHWith_self_assessment_id($result){
+        if(isset($result['self_assessment_id'])){
+            $self_assessment_id = $result['self_assessment_id'];
+
+            $get_self_assessment_id = $this->db
+            ->query(" SELECT * FROM `cv_self_assessment` WHERE self_assessment_id ='$self_assessment_id' ")
+            ->result_array();
+
+            // print_r($get_self_assessment_id[0]);
+            if($get_self_assessment_id[0]['doctor_approve_status_wfh'] ="1"){
+
+                $doctor_approve_id = $get_self_assessment_id[0]['doctor_approve_id'];
+                $get_doctor_approve = $this->db
+                ->query(" SELECT * FROM `cv_doctor_approve` WHERE doctor_approve_id ='$doctor_approve_id' ")
+                ->result_array();
+
+   
+                if(sizeof( $get_doctor_approve) != 0){
+                    $data_date_wfh = array (
+                        "ID" => $get_doctor_approve[0]['doctor_approve_id'], 
+                        "WFH_ST_DATE" =>  $get_doctor_approve[0]['doctor_approve_wfh_date_start'],
+                        "WFH_ED_DATE" => $get_doctor_approve[0]['doctor_approve_wfh_date_end'], 
+                        "WFH_EN_NUMBER" => $get_doctor_approve[0]['user_ad_code'], 
+                        "create_date" => $get_doctor_approve[0]['doctor_approve_datetime_create'] 
+                    );
+
+                    return $data_date_wfh;
+                }else{
+                    return null;
+                }
+            }
+        
+
+
+
+        }else{
+            return  array(  'status' => "false" , 'result' => "request self_assessment_id" );
+        }
+    }
+
 
     public function Get_Boss_by_ad($result){
 

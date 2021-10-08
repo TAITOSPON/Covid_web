@@ -152,6 +152,12 @@ class Api_Covid_User extends REST_Controller{
               $result = $this->Model_Covid_User->GetDateUserWFHWithUserAD($data);  
               echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
        }
+
+       public function GetDateUserWFHself_assessment_id_post(){
+              $data = json_decode(file_get_contents('php://input'), true);
+              $result = $this->Model_Covid_User->GetDateUserWFHWith_self_assessment_id($data);  
+              echo json_encode($result,JSON_UNESCAPED_UNICODE |JSON_PRETTY_PRINT);
+       }
        
        // FOR Chief +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     
